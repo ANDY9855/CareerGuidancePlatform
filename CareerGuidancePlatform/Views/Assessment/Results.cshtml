@@ -1,0 +1,92 @@
+@model CareerGuidancePlatform.Models.AssessmentResult
+@{ ViewData["Title"] = "Assessment Results"; }
+
+<div class="page-header text-center">
+    <div class="container">
+        <div class="feature-icon mx-auto mb-3" style="width:72px;height:72px;font-size:2rem"><i class="bi bi-trophy"></i></div>
+        <h1 class="text-white fw-bold">Your Career Assessment Results</h1>
+        <p class="text-muted">Based on your answers, here's your personalized career profile</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row justify-content-center g-4">
+            <div class="col-lg-8">
+                <!-- Suggested Career -->
+                <div class="card-glass text-center p-5 mb-4">
+                    <p class="text-muted mb-1">Your Best Career Match</p>
+                    <h2 class="text-gradient fw-bold" style="font-size:2.5rem">@Model.SuggestedCareer</h2>
+                    <p class="text-muted mt-2">Based on your unique combination of skills, interests, and personality traits</p>
+                    <a asp-controller="CareerPath" asp-action="Index" class="btn btn-primary mt-3">
+                        <i class="bi bi-map me-2"></i>Explore This Career Path
+                    </a>
+                </div>
+
+                <!-- Score Breakdown -->
+                <div class="card-glass mb-4">
+                    <h5 class="text-white fw-semibold mb-4"><i class="bi bi-bar-chart me-2 text-gradient"></i>Your Score Breakdown</h5>
+                    @{
+                        var scores = new[] {
+                            ("Technology / Engineering", Model.TechScore, "tag-blue"),
+                            ("Creative / Design", Model.CreativeScore, "tag-purple"),
+                            ("Analytics / Research", Model.AnalyticalScore, "tag-gold"),
+                            ("Leadership / Management", Model.LeadershipScore, "tag-green")
+                        };
+                    }
+                    @foreach (var (label, score, tagClass) in scores)
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted small">@label</span>
+                                <span class="tag @tagClass">@score%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width:@score%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Next Steps -->
+                <div class="card-glass">
+                    <h5 class="text-white fw-semibold mb-4"><i class="bi bi-lightning-charge me-2 text-gradient-gold"></i>Recommended Next Steps</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a asp-controller="Resources" asp-action="Index" class="card-glass d-block" style="padding:1rem;text-decoration:none">
+                                <i class="bi bi-book fs-4 text-gradient d-block mb-2"></i>
+                                <div class="text-white small fw-semibold">Browse Learning Resources</div>
+                                <div class="text-muted" style="font-size:0.75rem">Curated for your profile</div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a asp-controller="Mentorship" asp-action="Index" class="card-glass d-block" style="padding:1rem;text-decoration:none">
+                                <i class="bi bi-people fs-4 text-gradient-gold d-block mb-2"></i>
+                                <div class="text-white small fw-semibold">Find a Mentor</div>
+                                <div class="text-muted" style="font-size:0.75rem">Get personalized guidance</div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a asp-controller="Goals" asp-action="Create" class="card-glass d-block" style="padding:1rem;text-decoration:none">
+                                <i class="bi bi-bullseye fs-4 text-gradient d-block mb-2"></i>
+                                <div class="text-white small fw-semibold">Set Career Goals</div>
+                                <div class="text-muted" style="font-size:0.75rem">Track your progress</div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a asp-controller="Jobs" asp-action="Index" class="card-glass d-block" style="padding:1rem;text-decoration:none">
+                                <i class="bi bi-briefcase fs-4 text-gradient-gold d-block mb-2"></i>
+                                <div class="text-white small fw-semibold">Browse Jobs</div>
+                                <div class="text-muted" style="font-size:0.75rem">Find matching opportunities</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a asp-action="Index" class="btn btn-outline-primary">Retake Assessment</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

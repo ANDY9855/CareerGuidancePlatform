@@ -1,0 +1,199 @@
+@{
+    ViewData["Title"] = "Home - Career Guidance Platform";
+}
+
+<!-- HERO -->
+<section class="hero-section">
+    <div class="container position-relative" style="z-index:2">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="hero-badge"><i class="bi bi-stars"></i> Aptech eProject — Semester 3</div>
+                <h1 class="hero-title text-white">
+                    Your Journey to <span class="text-gradient">Career Success</span> Starts Here
+                </h1>
+                <p class="text-muted mt-3 mb-4" style="font-size:1.1rem;max-width:520px">
+                    Personalized career assessments, expert mentorship, curated learning resources, and job opportunities — all in one platform designed for you.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-controller="Assessment" asp-action="Index" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Take Career Assessment
+                    </a>
+                    <a asp-controller="CareerPath" asp-action="Index" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-map me-2"></i>Explore Paths
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">@ViewBag.MentorCount+</span>
+                        <span class="stat-label">Expert Mentors</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">@ViewBag.JobCount+</span>
+                        <span class="stat-label">Job Listings</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">@ViewBag.ResourceCount+</span>
+                        <span class="stat-label">Resources</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">@ViewBag.CareerPathCount+</span>
+                        <span class="stat-label">Career Paths</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block text-center">
+                <div style="font-size:12rem;opacity:0.12;line-height:1;">
+                    <i class="bi bi-compass"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section style="background:var(--bg-primary)">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">Everything You Need</span>
+            <h2 class="section-title text-white">8 Powerful <span class="text-gradient">Modules</span></h2>
+            <p class="text-muted">A complete career guidance ecosystem at your fingertips</p>
+        </div>
+        <div class="row g-4">
+            @{
+                var features = new[] {
+                    ("bi-clipboard-check","Assessment","Assessment","Index","Take personality & skills quizzes to discover your ideal career path.","tag-blue"),
+                    ("bi-book-open","Resources","Resources","Index","Access curated courses, books, tutorials and certifications.","tag-green"),
+                    ("bi-people","Mentorship","Mentorship","Index","Connect with industry experts for 1-on-1 guidance.","tag-purple"),
+                    ("bi-map","Career Paths","CareerPath","Index","Visual roadmaps showing skills, stages and salary info.","tag-gold"),
+                    ("bi-briefcase","Jobs","Jobs","Index","Personalized job board with application tracker.","tag-blue"),
+                    ("bi-bullseye","Goals","Goals","Index","Set career goals, track progress with milestones.","tag-green"),
+                    ("bi-calendar-event","Networking","Networking","Events","Events calendar and peer community to grow your network.","tag-purple"),
+                    ("bi-file-person","Resume","Resume","Builder","Build a professional resume with custom templates.","tag-gold")
+                };
+            }
+            @foreach (var (icon, label, ctrl, action, desc, tagClass) in features)
+            {
+                <div class="col-md-6 col-lg-3">
+                    <a asp-controller="@ctrl" asp-action="@action" style="text-decoration:none">
+                        <div class="card-glass h-100">
+                            <div class="feature-icon"><i class="bi @icon"></i></div>
+                            <span class="tag @tagClass mb-2">@label</span>
+                            <h6 class="text-white fw-semibold mt-2">@label</h6>
+                            <p class="text-muted small mb-0">@desc</p>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED JOBS -->
+@if (ViewBag.FeaturedJobs != null && ((List<CareerGuidancePlatform.Models.JobListing>)ViewBag.FeaturedJobs).Any())
+{
+    <section style="background: linear-gradient(135deg, #080f1e 0%, #0a1628 100%)">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Latest Opportunities</span>
+                <h2 class="section-title text-white">Featured <span class="text-gradient">Jobs & Internships</span></h2>
+            </div>
+            <div class="row g-4">
+                @foreach (var job in (List<CareerGuidancePlatform.Models.JobListing>)ViewBag.FeaturedJobs)
+                {
+                    <div class="col-md-4">
+                        <div class="card-glass h-100">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="text-white fw-semibold mb-1">@job.Title</h6>
+                                    <span class="text-muted small"><i class="bi bi-building me-1"></i>@job.Company</span>
+                                </div>
+                                <span class="tag @(job.Type == "Internship" ? "tag-gold" : "tag-blue")">@job.Type</span>
+                            </div>
+                            <p class="text-muted small"><i class="bi bi-geo-alt me-1"></i>@job.Location</p>
+                            <p class="text-muted small"><i class="bi bi-cash me-1"></i>@job.SalaryRange</p>
+                            <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@job.Id" class="btn btn-outline-primary btn-sm mt-3 w-100">View Details</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="text-center mt-4">
+                <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary">View All Jobs <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- FEATURED MENTORS -->
+@if (ViewBag.FeaturedMentors != null && ((List<CareerGuidancePlatform.Models.Mentor>)ViewBag.FeaturedMentors).Any())
+{
+    <section style="background:var(--bg-primary)">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Learn from the Best</span>
+                <h2 class="section-title text-white">Top <span class="text-gradient-gold">Mentors</span></h2>
+            </div>
+            <div class="row g-4">
+                @foreach (var mentor in (List<CareerGuidancePlatform.Models.Mentor>)ViewBag.FeaturedMentors)
+                {
+                    <div class="col-md-4">
+                        <div class="card-glass h-100 text-center">
+                            <div class="mentor-avatar mx-auto mb-3">@mentor.Name[0]</div>
+                            <h6 class="text-white fw-semibold">@mentor.Name</h6>
+                            <p class="text-muted small mb-1">@mentor.Specialization</p>
+                            <span class="tag tag-blue mb-2">@mentor.Industry</span>
+                            <div class="stars mb-2">@string.Concat(Enumerable.Repeat("★", (int)mentor.Rating))</div>
+                            <p class="text-muted small">@mentor.TotalSessions sessions completed</p>
+                            <a asp-controller="Mentorship" asp-action="Profile" asp-route-id="@mentor.Id" class="btn btn-outline-primary btn-sm mt-2">View Profile</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="text-center mt-4">
+                <a asp-controller="Mentorship" asp-action="Index" class="btn btn-gold">Browse All Mentors <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- SITEMAP -->
+<section style="background: linear-gradient(135deg, #080f1e 0%, #0a1628 100%)">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">Platform Map</span>
+            <h2 class="section-title text-white">Site <span class="text-gradient">Map</span></h2>
+            <p class="text-muted">Overview of all pages and features in the platform</p>
+        </div>
+        <div class="text-center mb-4">
+            <a asp-controller="Home" asp-action="Index" class="sitemap-node sitemap-root d-inline-block px-4">
+                <i class="bi bi-compass fs-4 d-block mb-1"></i>CareerPath Home
+            </a>
+            <div class="text-muted my-2" style="font-size:1.5rem">↓</div>
+        </div>
+        <div class="sitemap-grid">
+            <a asp-controller="Assessment" asp-action="Index" class="sitemap-node"><i class="bi bi-clipboard-check fs-4 d-block mb-1 text-gradient"></i>Career Assessment</a>
+            <a asp-controller="Resources" asp-action="Index" class="sitemap-node"><i class="bi bi-book-open fs-4 d-block mb-1" style="color:#34c759"></i>Resources Library</a>
+            <a asp-controller="Mentorship" asp-action="Index" class="sitemap-node"><i class="bi bi-people fs-4 d-block mb-1" style="color:#af52de"></i>Mentor Directory</a>
+            <a asp-controller="CareerPath" asp-action="Index" class="sitemap-node"><i class="bi bi-map fs-4 d-block mb-1 text-gradient-gold"></i>Career Paths</a>
+            <a asp-controller="Jobs" asp-action="Index" class="sitemap-node"><i class="bi bi-briefcase fs-4 d-block mb-1 text-gradient"></i>Job Board</a>
+            <a asp-controller="Goals" asp-action="Index" class="sitemap-node"><i class="bi bi-bullseye fs-4 d-block mb-1" style="color:#34c759"></i>Goals Dashboard</a>
+            <a asp-controller="Networking" asp-action="Events" class="sitemap-node"><i class="bi bi-calendar-event fs-4 d-block mb-1" style="color:#af52de"></i>Networking Events</a>
+            <a asp-controller="Networking" asp-action="Community" class="sitemap-node"><i class="bi bi-chat-dots fs-4 d-block mb-1 text-gradient"></i>Peer Community</a>
+            <a asp-controller="Resume" asp-action="Builder" class="sitemap-node"><i class="bi bi-file-person fs-4 d-block mb-1 text-gradient-gold"></i>Resume Builder</a>
+            <a asp-controller="Account" asp-action="Register" class="sitemap-node"><i class="bi bi-person-plus fs-4 d-block mb-1 text-gradient"></i>Register</a>
+            <a asp-controller="Account" asp-action="Login" class="sitemap-node"><i class="bi bi-box-arrow-in-right fs-4 d-block mb-1" style="color:#34c759"></i>Login</a>
+            <a asp-controller="CareerPath" asp-action="Stories" class="sitemap-node"><i class="bi bi-stars fs-4 d-block mb-1 text-gradient-gold"></i>Success Stories</a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section style="background:var(--bg-primary)">
+    <div class="container text-center">
+        <h2 class="section-title text-white mb-3">Ready to <span class="text-gradient">Start Your Journey?</span></h2>
+        <p class="text-muted mb-4" style="max-width:500px;margin:0 auto">Join thousands of students and professionals who have transformed their careers with CareerPath.</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Create Free Account</a>
+            <a asp-controller="Assessment" asp-action="Index" class="btn btn-outline-light btn-lg">Take Assessment</a>
+        </div>
+    </div>
+</section>

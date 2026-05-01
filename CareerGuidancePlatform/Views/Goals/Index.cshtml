@@ -1,0 +1,83 @@
+@model List<CareerGuidancePlatform.Models.Goal>
+@{ ViewData["Title"] = "Goals Dashboard"; }
+
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+            <span class="section-badge">Goal Setting</span>
+            <h1 class="text-white fw-bold mt-2">My Career Goals</h1>
+            <p class="text-muted">Set, track and achieve your short and long-term career objectives</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary align-self-end">
+            <i class="bi bi-plus-lg me-2"></i>Add New Goal
+        </a>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-bullseye fs-1 text-muted d-block mb-3"></i>
+                <h5 class="text-muted">No goals yet — start by setting your first career goal!</h5>
+                <a asp-action="Create" class="btn btn-primary mt-3">Create First Goal</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var g in Model)
+                {
+                    <div class="col-md-6">
+                        <div class="card-glass h-100">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <div class="d-flex gap-2 mb-1">
+                                        <span class="tag @(g.TermType=="Short"?"tag-blue":"tag-gold")">@g.TermType-term</span>
+                                        <span class="tag tag-purple">@g.Category</span>
+                                        @if (g.IsCompleted) { <span class="tag tag-green">✓ Completed</span> }
+                                    </div>
+                                    <h5 class="text-white fw-bold mb-0">@g.Title</h5>
+                                </div>
+                                <form asp-action="Delete" method="post">
+                                    <input type="hidden" name="id" value="@g.Id" />
+                                    <button type="submit" class="btn btn-sm" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);color:#ff3b30" onclick="return confirm('Delete this goal?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <p class="text-muted small mb-3">@g.Description</p>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-muted small">Progress</span>
+                                    <span class="tag @(g.ProgressPercent==100?"tag-green":"tag-blue")">@g.ProgressPercent%</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar @(g.ProgressPercent==100?"gold":"")" style="width:@g.ProgressPercent%"></div>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-3"><i class="bi bi-calendar-check me-1"></i>Target: @g.TargetDate.ToString("MMM dd, yyyy")</p>
+                            @if (g.Milestones.Any())
+                            {
+                                <div>
+                                    <p class="text-muted small fw-semibold mb-2">Milestones:</p>
+                                    @foreach (var m in g.Milestones.OrderBy(m => m.OrderIndex))
+                                    {
+                                        <form asp-action="ToggleMilestone" method="post" class="d-flex align-items-center gap-2 mb-2">
+                                            <input type="hidden" name="milestoneId" value="@m.Id" />
+                                            <button type="submit" class="btn p-0 border-0" style="background:transparent">
+                                                <i class="bi @(m.IsCompleted?"bi-check-circle-fill text-success":"bi-circle text-muted") fs-5"></i>
+                                            </button>
+                                            <span class="small @(m.IsCompleted?"text-muted text-decoration-line-through":"text-white")">@m.Title</span>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

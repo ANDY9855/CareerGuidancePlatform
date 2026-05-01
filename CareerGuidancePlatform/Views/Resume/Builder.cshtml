@@ -1,0 +1,165 @@
+@model CareerGuidancePlatform.Models.ResumeData
+@{ ViewData["Title"] = "Resume Builder"; }
+
+<div class="page-header">
+    <div class="container">
+        <span class="section-badge">Career Tools</span>
+        <h1 class="text-white fw-bold mt-2">Interactive Resume Builder</h1>
+        <p class="text-muted">Build a professional resume with automatic formatting</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <form asp-action="Save" method="post" id="resumeForm">
+            <div class="row g-4">
+                <!-- Personal Info -->
+                <div class="col-12">
+                    <div class="card-glass">
+                        <h5 class="text-white fw-bold mb-4"><i class="bi bi-person-circle me-2 text-gradient"></i>Personal Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6"><label class="form-label">Full Name</label><input asp-for="FullName" class="form-control" placeholder="John Doe" /></div>
+                            <div class="col-md-6"><label class="form-label">Email</label><input asp-for="Email" class="form-control" type="email" /></div>
+                            <div class="col-md-4"><label class="form-label">Phone</label><input asp-for="Phone" class="form-control" placeholder="+92 300 0000000" /></div>
+                            <div class="col-md-4"><label class="form-label">Location</label><input asp-for="Location" class="form-control" placeholder="Karachi, Pakistan" /></div>
+                            <div class="col-md-4"><label class="form-label">LinkedIn</label><input asp-for="LinkedIn" class="form-control" placeholder="linkedin.com/in/yourname" /></div>
+                            <div class="col-12"><label class="form-label">Professional Summary</label><textarea asp-for="Summary" class="form-control" rows="3" placeholder="Brief professional summary..."></textarea></div>
+                            <div class="col-12"><label class="form-label">Skills (comma-separated)</label><input asp-for="Skills" class="form-control" placeholder="Python, SQL, React, Leadership..." /></div>
+                            <div class="col-md-4">
+                                <label class="form-label">Template</label>
+                                <select asp-for="Template" class="form-select">
+                                    <option value="Modern">Modern (Dark)</option>
+                                    <option value="Classic">Classic (Light)</option>
+                                    <option value="Creative">Creative (Bold)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience -->
+                <div class="col-12">
+                    <div class="card-glass">
+                        <div class="d-flex justify-content-between mb-4">
+                            <h5 class="text-white fw-bold mb-0"><i class="bi bi-briefcase me-2 text-gradient"></i>Work Experience</h5>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addExp()"><i class="bi bi-plus me-1"></i>Add</button>
+                        </div>
+                        <div id="expContainer">
+                            @if (Model.Experiences.Any()) {
+                                @foreach(var e in Model.Experiences) {
+                                <div class="card-glass mb-3 exp-entry">
+                                    <div class="row g-2">
+                                        <div class="col-md-6"><input type="text" name="jobTitles" class="form-control" value="@e.JobTitle" placeholder="Job Title" /></div>
+                                        <div class="col-md-6"><input type="text" name="companies" class="form-control" value="@e.Company" placeholder="Company" /></div>
+                                        <div class="col-md-3"><input type="text" name="startDates" class="form-control" value="@e.StartDate" placeholder="Start (e.g. Jan 2023)" /></div>
+                                        <div class="col-md-3"><input type="text" name="endDates" class="form-control" value="@e.EndDate" placeholder="End (or Present)" /></div>
+                                        <div class="col-md-6"><textarea name="expDescriptions" class="form-control" rows="2" placeholder="Description...">@e.Description</textarea></div>
+                                    </div>
+                                </div>
+                                }
+                            } else {
+                            <div class="card-glass mb-3 exp-entry">
+                                <div class="row g-2">
+                                    <div class="col-md-6"><input type="text" name="jobTitles" class="form-control" placeholder="Job Title" /></div>
+                                    <div class="col-md-6"><input type="text" name="companies" class="form-control" placeholder="Company" /></div>
+                                    <div class="col-md-3"><input type="text" name="startDates" class="form-control" placeholder="Start (e.g. Jan 2023)" /></div>
+                                    <div class="col-md-3"><input type="text" name="endDates" class="form-control" placeholder="End (or Present)" /></div>
+                                    <div class="col-md-6"><textarea name="expDescriptions" class="form-control" rows="2" placeholder="Description..."></textarea></div>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education -->
+                <div class="col-md-6">
+                    <div class="card-glass h-100">
+                        <div class="d-flex justify-content-between mb-4">
+                            <h5 class="text-white fw-bold mb-0"><i class="bi bi-mortarboard me-2 text-gradient-gold"></i>Education</h5>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addEdu()"><i class="bi bi-plus"></i></button>
+                        </div>
+                        <div id="eduContainer">
+                            @if(Model.Educations.Any()) {
+                                @foreach(var e in Model.Educations) {
+                                <div class="card-glass mb-2 edu-entry">
+                                    <div class="row g-2">
+                                        <div class="col-12"><input type="text" name="degrees" class="form-control" value="@e.Degree" placeholder="Degree / Program" /></div>
+                                        <div class="col-8"><input type="text" name="institutions" class="form-control" value="@e.Institution" placeholder="Institution" /></div>
+                                        <div class="col-4"><input type="text" name="years" class="form-control" value="@e.Year" placeholder="Year" /></div>
+                                    </div>
+                                </div>
+                                }
+                            } else {
+                            <div class="card-glass mb-2 edu-entry">
+                                <div class="row g-2">
+                                    <div class="col-12"><input type="text" name="degrees" class="form-control" placeholder="Degree / Program" /></div>
+                                    <div class="col-8"><input type="text" name="institutions" class="form-control" placeholder="Institution" /></div>
+                                    <div class="col-4"><input type="text" name="years" class="form-control" placeholder="Year" /></div>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certifications -->
+                <div class="col-md-6">
+                    <div class="card-glass h-100">
+                        <div class="d-flex justify-content-between mb-4">
+                            <h5 class="text-white fw-bold mb-0"><i class="bi bi-patch-check me-2 text-gradient"></i>Certifications</h5>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addCert()"><i class="bi bi-plus"></i></button>
+                        </div>
+                        <div id="certContainer">
+                            @if(Model.Certifications.Any()) {
+                                @foreach(var c in Model.Certifications) {
+                                <div class="card-glass mb-2 cert-entry">
+                                    <div class="row g-2">
+                                        <div class="col-12"><input type="text" name="certNames" class="form-control" value="@c.Name" placeholder="Certification Name" /></div>
+                                        <div class="col-8"><input type="text" name="certIssuers" class="form-control" value="@c.IssuedBy" placeholder="Issued By" /></div>
+                                        <div class="col-4"><input type="text" name="certYears" class="form-control" value="@c.Year" placeholder="Year" /></div>
+                                    </div>
+                                </div>
+                                }
+                            } else {
+                            <div class="card-glass mb-2 cert-entry">
+                                <div class="row g-2">
+                                    <div class="col-12"><input type="text" name="certNames" class="form-control" placeholder="Certification Name" /></div>
+                                    <div class="col-8"><input type="text" name="certIssuers" class="form-control" placeholder="Issued By" /></div>
+                                    <div class="col-4"><input type="text" name="certYears" class="form-control" placeholder="Year" /></div>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        <i class="bi bi-save me-2"></i>Save & Preview Resume
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+function addExp() {
+    const clone = document.querySelector('.exp-entry').cloneNode(true);
+    clone.querySelectorAll('input,textarea').forEach(i => i.value = '');
+    document.getElementById('expContainer').appendChild(clone);
+}
+function addEdu() {
+    const clone = document.querySelector('.edu-entry').cloneNode(true);
+    clone.querySelectorAll('input').forEach(i => i.value = '');
+    document.getElementById('eduContainer').appendChild(clone);
+}
+function addCert() {
+    const clone = document.querySelector('.cert-entry').cloneNode(true);
+    clone.querySelectorAll('input').forEach(i => i.value = '');
+    document.getElementById('certContainer').appendChild(clone);
+}
+</script>
+}

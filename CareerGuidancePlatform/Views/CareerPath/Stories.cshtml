@@ -1,0 +1,40 @@
+@model List<CareerGuidancePlatform.Models.SuccessStory>
+@{ ViewData["Title"] = "Success Stories"; }
+
+<div class="page-header">
+    <div class="container">
+        <span class="section-badge">Inspiration</span>
+        <h1 class="text-white fw-bold mt-2">Success Stories</h1>
+        <p class="text-muted">Real career journeys from professionals who transformed their lives</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row g-4">
+            @foreach (var s in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-glass h-100">
+                        <div class="d-flex gap-3 align-items-center mb-3">
+                            <div class="mentor-avatar" style="width:52px;height:52px;font-size:1.3rem">@s.PersonName[0]</div>
+                            <div>
+                                <h6 class="text-white fw-bold mb-0">@s.PersonName</h6>
+                                <span class="text-muted small">@s.CurrentRole</span>
+                                <div><span class="tag tag-gold" style="font-size:0.7rem">@s.Company</span></div>
+                            </div>
+                        </div>
+                        <div class="mb-3" style="color:var(--accent-gold);font-size:1.2rem">❝</div>
+                        <p class="text-muted small" style="font-style:italic">@s.Story</p>
+                        <span class="tag tag-blue mt-3">@s.Industry</span>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="text-center mt-5">
+            <a asp-controller="Assessment" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="bi bi-compass me-2"></i>Start Your Own Story
+            </a>
+        </div>
+    </div>
+</section>

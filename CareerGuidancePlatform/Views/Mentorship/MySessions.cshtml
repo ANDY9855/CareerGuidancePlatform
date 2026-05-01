@@ -1,0 +1,41 @@
+@model List<CareerGuidancePlatform.Models.MentorSession>
+@{ ViewData["Title"] = "My Sessions"; }
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold">My Booked Sessions</h1>
+        <p class="text-muted">Track and manage all your mentorship sessions</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x fs-1 text-muted d-block mb-3"></i>
+                <h5 class="text-muted">No sessions booked yet</h5>
+                <a asp-action="Index" class="btn btn-primary mt-3">Browse Mentors</a>
+            </div>
+        }
+        @foreach (var s in Model)
+        {
+            <div class="card-glass mb-3">
+                <div class="row align-items-center">
+                    <div class="col-md-7">
+                        <div class="d-flex gap-2 mb-2">
+                            <span class="tag @(s.Status=="Confirmed"?"tag-green":s.Status=="Completed"?"tag-blue":s.Status=="Cancelled"?"tag-red":"tag-gold")">@s.Status</span>
+                            <span class="tag tag-purple">@s.SessionType</span>
+                        </div>
+                        <h6 class="text-white fw-bold">@s.Topic</h6>
+                        <p class="text-muted small mb-0">with <strong class="text-white">@s.Mentor?.Name</strong> — @s.Mentor?.Specialization</p>
+                        <p class="text-muted small"><i class="bi bi-calendar me-1"></i>@s.ScheduledAt.ToString("MMMM dd, yyyy h:mm tt")</p>
+                    </div>
+                    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+                        <a asp-action="Profile" asp-route-id="@s.MentorId" class="btn btn-outline-primary btn-sm">View Mentor</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

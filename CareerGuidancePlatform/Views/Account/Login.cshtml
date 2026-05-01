@@ -1,0 +1,43 @@
+@model LoginViewModel
+@{ ViewData["Title"] = "Sign In"; }
+
+<div style="min-height:100vh;display:flex;align-items:center;background:var(--gradient-hero);padding:4rem 0">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card-glass p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="feature-icon mx-auto mb-3"><i class="bi bi-box-arrow-in-right"></i></div>
+                        <h2 class="text-white fw-bold">Welcome Back</h2>
+                        <p class="text-muted small">Sign in to continue your career journey</p>
+                    </div>
+                    <div class="card-glass p-3 mb-4" style="background:rgba(79,110,247,0.08)">
+                        <p class="text-muted small mb-1"><i class="bi bi-info-circle me-1"></i><strong class="text-white">Demo Credentials</strong></p>
+                        <p class="text-muted small mb-0">Email: <code class="text-gradient">demo@career.com</code> | Password: <code class="text-gradient">Demo@123</code></p>
+                    </div>
+                    <form asp-action="Login" method="post">
+                        <div asp-validation-summary="All" class="text-danger small mb-2"></div>
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input asp-for="Email" class="form-control" type="email" placeholder="your@email.com" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input asp-for="Password" class="form-control" type="password" placeholder="••••••••" required />
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMe" style="accent-color:var(--accent-blue)" />
+                            <label class="form-check-label text-muted small" for="rememberMe">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        </button>
+                    </form>
+                    <p class="text-center text-muted small mt-3 mb-0">
+                        Don't have an account? <a asp-controller="Account" asp-action="Register" class="text-gradient">Register free</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

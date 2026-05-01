@@ -1,0 +1,103 @@
+@model CareerGuidancePlatform.Models.ResumeData
+@{ ViewData["Title"] = "Resume Preview"; Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@Model.FullName - Resume</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        * { margin:0;padding:0;box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#f5f5f5; }
+        .resume { max-width:800px; margin:2rem auto; background:white; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
+        .header { background:@(Model.Template=="Creative"?"linear-gradient(135deg,#7c5cf7,#4f6ef7)":Model.Template=="Classic"?"#2d3748":"linear-gradient(135deg,#0a1628,#1a3460)"); color:white; padding:2.5rem; }
+        .header h1 { font-size:2rem; font-weight:800; }
+        .header p { opacity:0.8; margin-top:0.25rem; font-size:0.9rem; }
+        .contact { display:flex; gap:1.5rem; margin-top:1rem; flex-wrap:wrap; }
+        .contact span { font-size:0.82rem; opacity:0.85; }
+        .body { padding:2rem; }
+        .section { margin-bottom:1.75rem; }
+        .section-title { font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#4f6ef7; border-bottom:2px solid #4f6ef7; padding-bottom:0.4rem; margin-bottom:1rem; }
+        .summary { font-size:0.9rem; color:#4a5568; line-height:1.7; }
+        .skills { display:flex; flex-wrap:wrap; gap:0.5rem; }
+        .skill-tag { background:#eef2ff; color:#4f6ef7; padding:0.25rem 0.75rem; border-radius:50px; font-size:0.78rem; font-weight:600; }
+        .exp-item, .edu-item, .cert-item { margin-bottom:1.25rem; }
+        .exp-item h4, .edu-item h4, .cert-item h4 { font-size:0.95rem; font-weight:700; color:#1a202c; }
+        .exp-item .company, .edu-item .institution { font-size:0.85rem; color:#4f6ef7; font-weight:600; }
+        .exp-item .dates, .edu-item .year { font-size:0.78rem; color:#718096; }
+        .exp-item .desc { font-size:0.85rem; color:#4a5568; margin-top:0.4rem; line-height:1.6; }
+        .no-print { text-align:center; padding:1.5rem; background:#f0f0f0; }
+        .no-print a { margin:0 0.5rem; }
+        @@media print { .no-print { display:none; } body { background:white; } .resume { box-shadow:none; margin:0; } }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <a href="javascript:window.print()" style="background:#4f6ef7;color:white;padding:0.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600">🖨 Print / Save as PDF</a>
+        <a asp-controller="Resume" asp-action="Builder" style="background:#0a1628;color:white;padding:0.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600">✏ Edit Resume</a>
+    </div>
+    <div class="resume">
+        <div class="header">
+            <h1>@Model.FullName</h1>
+            <div class="contact">
+                @if (!string.IsNullOrEmpty(Model.Email)) { <span>✉ @Model.Email</span> }
+                @if (!string.IsNullOrEmpty(Model.Phone)) { <span>📞 @Model.Phone</span> }
+                @if (!string.IsNullOrEmpty(Model.Location)) { <span>📍 @Model.Location</span> }
+                @if (!string.IsNullOrEmpty(Model.LinkedIn)) { <span>🔗 @Model.LinkedIn</span> }
+            </div>
+        </div>
+        <div class="body">
+            @if (!string.IsNullOrEmpty(Model.Summary)) {
+            <div class="section">
+                <div class="section-title">Professional Summary</div>
+                <p class="summary">@Model.Summary</p>
+            </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Skills)) {
+            <div class="section">
+                <div class="section-title">Skills</div>
+                <div class="skills">
+                    @foreach (var s in Model.Skills.Split(',')) { <span class="skill-tag">@s.Trim()</span> }
+                </div>
+            </div>
+            }
+            @if (Model.Experiences.Any()) {
+            <div class="section">
+                <div class="section-title">Work Experience</div>
+                @foreach (var e in Model.Experiences) {
+                <div class="exp-item">
+                    <h4>@e.JobTitle</h4>
+                    <div class="company">@e.Company</div>
+                    <div class="dates">@e.StartDate – @e.EndDate</div>
+                    @if (!string.IsNullOrEmpty(e.Description)) { <p class="desc">@e.Description</p> }
+                </div>
+                }
+            </div>
+            }
+            @if (Model.Educations.Any()) {
+            <div class="section">
+                <div class="section-title">Education</div>
+                @foreach (var e in Model.Educations) {
+                <div class="edu-item">
+                    <h4>@e.Degree</h4>
+                    <div class="institution">@e.Institution</div>
+                    <div class="year">@e.Year</div>
+                </div>
+                }
+            </div>
+            }
+            @if (Model.Certifications.Any()) {
+            <div class="section">
+                <div class="section-title">Certifications</div>
+                @foreach (var c in Model.Certifications) {
+                <div class="cert-item">
+                    <h4>@c.Name</h4>
+                    <div class="company">@c.IssuedBy — @c.Year</div>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+</body>
+</html>

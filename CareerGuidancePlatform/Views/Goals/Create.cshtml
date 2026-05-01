@@ -1,0 +1,82 @@
+@model CareerGuidancePlatform.Models.CreateGoalViewModel
+@{ ViewData["Title"] = "Create Goal"; }
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold">Create New Goal</h1>
+        <p class="text-muted">Set a clear, measurable career objective with milestones</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="card-glass">
+                    <form asp-action="Create" method="post" id="goalForm">
+                        <div class="mb-3">
+                            <label class="form-label">Goal Title</label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. Get AWS Cloud Practitioner Certification" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe your goal in detail..."></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Category</label>
+                                <select asp-for="Category" class="form-select">
+                                    <option value="Certification">Certification</option>
+                                    <option value="Internship">Internship</option>
+                                    <option value="Job">Job</option>
+                                    <option value="Skill">Skill</option>
+                                    <option value="Networking">Networking</option>
+                                    <option value="Education">Education</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Term</label>
+                                <select asp-for="TermType" class="form-select">
+                                    <option value="Short">Short-term (≤3 months)</option>
+                                    <option value="Long">Long-term (3+ months)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Target Date</label>
+                                <input asp-for="TargetDate" class="form-control" type="date" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Milestones (Step-by-step actions)</label>
+                            <div id="milestones">
+                                <div class="d-flex gap-2 mb-2">
+                                    <input type="text" name="Milestones" class="form-control" placeholder="e.g. Complete online practice tests" />
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addMilestone()"><i class="bi bi-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="bi bi-bullseye me-2"></i>Create Goal
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-primary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+function addMilestone() {
+    const div = document.createElement('div');
+    div.className = 'd-flex gap-2 mb-2';
+    div.innerHTML = '<input type="text" name="Milestones" class="form-control" placeholder="Add another milestone..." /><button type="button" class="btn btn-sm" style="background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);color:#ff3b30" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>';
+    document.getElementById('milestones').appendChild(div);
+}
+</script>
+}

@@ -1,0 +1,52 @@
+@model List<CareerGuidancePlatform.Models.NetworkingEvent>
+@{ ViewData["Title"] = "Networking Events"; }
+
+<div class="page-header">
+    <div class="container">
+        <span class="section-badge">Networking</span>
+        <h1 class="text-white fw-bold mt-2">Events & Networking Calendar</h1>
+        <p class="text-muted">Industry conferences, webinars, meetups and workshops to grow your network</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="d-flex gap-3 mb-5 flex-wrap">
+            <a asp-action="Events" class="btn btn-primary btn-sm">All Events</a>
+            <a asp-controller="Networking" asp-action="Community" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-chat-dots me-1"></i>Peer Community
+            </a>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var e in Model)
+            {
+                <div class="col-md-6">
+                    <div class="card-glass h-100">
+                        <div class="d-flex gap-2 mb-3">
+                            <span class="tag @(e.IsOnline?"tag-green":"tag-blue")">@(e.IsOnline?"Online":"In-Person")</span>
+                            <span class="tag tag-purple">@e.EventType</span>
+                            <span class="tag tag-gold">@e.Industry</span>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="feature-icon" style="flex-shrink:0"><i class="bi @e.IconClass"></i></div>
+                            <div>
+                                <h5 class="text-white fw-bold mb-1">@e.Title</h5>
+                                <p class="text-muted small mb-2">@e.Description</p>
+                                <p class="text-muted small mb-1"><i class="bi bi-calendar-event me-1"></i>@e.EventDate.ToString("MMMM dd, yyyy - h:mm tt")</p>
+                                <p class="text-muted small"><i class="bi bi-geo-alt me-1"></i>@e.Location</p>
+                                <p class="text-muted small"><i class="bi bi-person me-1"></i>Organized by @e.Organizer</p>
+                                @if (!string.IsNullOrEmpty(e.RegistrationUrl))
+                                {
+                                    <a href="@e.RegistrationUrl" target="_blank" class="btn btn-primary btn-sm mt-2">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>Register Now
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

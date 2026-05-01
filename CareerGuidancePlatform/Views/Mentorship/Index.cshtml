@@ -1,0 +1,62 @@
+@model List<CareerGuidancePlatform.Models.Mentor>
+@{ ViewData["Title"] = "Mentor Directory"; }
+
+<div class="page-header">
+    <div class="container">
+        <span class="section-badge">Mentorship Program</span>
+        <h1 class="text-white fw-bold mt-2">Find Your Perfect Mentor</h1>
+        <p class="text-muted">Connect with experienced professionals across all industries</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="card-glass mb-5">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label">Industry</label>
+                    <select name="industry" class="form-select">
+                        <option value="">All Industries</option>
+                        @foreach (var i in (List<string>)ViewBag.Industries)
+                        { <option value="@i">@i</option> }
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Specialization</label>
+                    <input name="specialization" class="form-control" placeholder="e.g. Data Science, UX Design..." />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var m in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-glass h-100">
+                        <div class="d-flex gap-3 align-items-start mb-3">
+                            <div class="mentor-avatar" style="width:56px;height:56px;font-size:1.4rem">@m.Name[0]</div>
+                            <div>
+                                <h6 class="text-white fw-semibold mb-0">@m.Name</h6>
+                                <span class="text-muted small">@m.Specialization</span>
+                                <div><span class="tag tag-blue mt-1">@m.Industry</span></div>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-3">@(m.Bio.Length > 100 ? m.Bio[..100] + "..." : m.Bio)</p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="stars" style="font-size:0.85rem">@string.Concat(Enumerable.Repeat("★",(int)m.Rating))<span class="text-muted ms-1">@m.Rating</span></div>
+                            <span class="text-muted small">@m.TotalSessions sessions</span>
+                        </div>
+                        <p class="text-muted small"><i class="bi bi-clock me-1"></i>@m.Availability</p>
+                        <div class="d-flex gap-2 mt-3">
+                            <a asp-action="Profile" asp-route-id="@m.Id" class="btn btn-outline-primary btn-sm flex-grow-1">View Profile</a>
+                            <a asp-action="Book" asp-route-mentorId="@m.Id" class="btn btn-primary btn-sm flex-grow-1">Book Session</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

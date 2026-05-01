@@ -1,0 +1,59 @@
+@model List<CareerGuidancePlatform.Models.AssessmentQuestion>
+@{ ViewData["Title"] = "Career Assessment"; }
+
+<div class="page-header">
+    <div class="container">
+        <span class="section-badge">Step 1 of 1</span>
+        <h1 class="text-white fw-bold mt-2">Career Assessment Quiz</h1>
+        <p class="text-muted">Answer @Model.Count questions to discover your ideal career path</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <form asp-action="Submit" method="post" id="quizForm">
+                    @{ int qNum = 0; }
+                    @foreach (var q in Model)
+                    {
+                        qNum++;
+                        <div class="card-glass mb-4 quiz-question" id="q@(qNum)">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="tag tag-blue">Q@qNum</span>
+                                <span class="tag tag-purple small">@q.Category</span>
+                            </div>
+                            <h5 class="text-white mb-3">@q.QuestionText</h5>
+                            @foreach (var (opt, label) in new[] { (q.OptionA,"A"), (q.OptionB,"B"), (q.OptionC,"C"), (q.OptionD,"D") })
+                            {
+                                <label class="quiz-option">
+                                    <input type="radio" name="answers[@q.Id]" value="@label" required />
+                                    <span class="tag tag-blue">@label</span>
+                                    <span class="text-primary" style="color:var(--text-primary)!important">@opt</span>
+                                </label>
+                            }
+                        </div>
+                    }
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="bi bi-graph-up-arrow me-2"></i>Get My Career Results
+                        </button>
+                        <p class="text-muted small mt-2">Your results are saved to your profile</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+        const name = opt.querySelector('input[type=radio]').name;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.closest('.quiz-option').classList.remove('selected'));
+        opt.classList.add('selected');
+    });
+});
+</script>
+}

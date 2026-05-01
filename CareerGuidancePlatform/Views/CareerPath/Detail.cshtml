@@ -1,0 +1,65 @@
+@model CareerGuidancePlatform.Models.CareerPath
+@{ ViewData["Title"] = Model.Title + " Career Path"; }
+
+<div class="page-header">
+    <div class="container">
+        <div class="feature-icon mb-3"><i class="bi @Model.IconClass"></i></div>
+        <h1 class="text-white fw-bold">@Model.Title</h1>
+        <span class="tag tag-blue">@Model.Industry</span>
+        <p class="text-muted mt-2">@Model.Description</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card-glass mb-4">
+                    <h6 class="text-white fw-semibold mb-3"><i class="bi bi-info-circle me-2 text-gradient"></i>Overview</h6>
+                    <div class="mb-3"><span class="text-muted small d-block">Average Salary</span><span class="text-gradient fw-bold">@Model.AverageSalary</span></div>
+                    <div class="mb-3"><span class="text-muted small d-block">Job Outlook</span><span class="text-gradient-gold fw-semibold">@Model.JobOutlook</span></div>
+                    <div class="mb-3"><span class="text-muted small d-block">Education Required</span><span class="text-white small">@Model.EducationRequired</span></div>
+                    <div><span class="text-muted small d-block">Key Skills</span>
+                        @foreach (var skill in Model.RequiredSkills.Split(','))
+                        { <span class="tag tag-blue me-1 mb-1">@skill.Trim()</span> }
+                    </div>
+                </div>
+                <a asp-controller="Assessment" asp-action="Index" class="btn btn-primary w-100 mb-3">
+                    <i class="bi bi-clipboard-check me-2"></i>Take Assessment
+                </a>
+                <a asp-controller="Resources" asp-action="Index" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-book me-2"></i>Browse Resources
+                </a>
+            </div>
+            <div class="col-lg-8">
+                <h5 class="text-white fw-bold mb-4"><i class="bi bi-diagram-3 me-2 text-gradient"></i>Career Roadmap</h5>
+                @if (Model.Stages.Any())
+                {
+                    <div class="timeline">
+                        @foreach (var stage in Model.Stages)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="card-glass">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="text-white fw-bold mb-0">@stage.Title</h6>
+                                        <span class="tag tag-gold">@stage.YearsRequired+ yrs</span>
+                                    </div>
+                                    <p class="text-muted small mb-2">@stage.Description</p>
+                                    <div>@foreach (var s in stage.Skills.Split(',')) { <span class="tag tag-blue me-1">@s.Trim()</span> }</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="card-glass text-center p-5">
+                        <i class="bi bi-diagram-3 fs-1 text-muted d-block mb-2"></i>
+                        <p class="text-muted">Career stages coming soon</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

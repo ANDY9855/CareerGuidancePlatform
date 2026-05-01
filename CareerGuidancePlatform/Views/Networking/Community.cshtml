@@ -1,0 +1,73 @@
+@model List<CareerGuidancePlatform.Models.PeerPost>
+@{ ViewData["Title"] = "Peer Community"; }
+
+<div class="page-header">
+    <div class="container">
+        <span class="section-badge">Peer Network</span>
+        <h1 class="text-white fw-bold mt-2">Community Space</h1>
+        <p class="text-muted">Connect, share experiences, and support each other on your career journeys</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <div class="card-glass mb-4">
+                        <h6 class="text-white fw-semibold mb-3"><i class="bi bi-pencil me-2 text-gradient"></i>Share with the community</h6>
+                        <form asp-action="Post" method="post">
+                            <div class="mb-3">
+                                <select name="category" class="form-select mb-2">
+                                    <option value="Advice">Advice</option>
+                                    <option value="Question">Question</option>
+                                    <option value="Experience">Experience</option>
+                                    <option value="Opportunity">Opportunity</option>
+                                </select>
+                                <textarea name="content" class="form-control" rows="4" placeholder="Share your thoughts, advice or ask a question..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Post</button>
+                        </form>
+                    </div>
+                }
+                <div class="card-glass">
+                    <h6 class="text-white fw-semibold mb-3">Quick Links</h6>
+                    <a asp-action="Events" class="btn btn-outline-primary w-100 mb-2 text-start"><i class="bi bi-calendar-event me-2"></i>Events Calendar</a>
+                    <a asp-controller="Mentorship" asp-action="Index" class="btn btn-outline-primary w-100 text-start"><i class="bi bi-people me-2"></i>Find a Mentor</a>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-chat-dots fs-1 text-muted d-block mb-3"></i>
+                        <p class="text-muted">No posts yet — be the first to share!</p>
+                    </div>
+                }
+                @foreach (var post in Model)
+                {
+                    <div class="card-glass mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="mentor-avatar" style="width:38px;height:38px;font-size:0.9rem">@(post.User?.FullName?.FirstOrDefault() ?? 'U')</div>
+                                <div>
+                                    <span class="text-white small fw-semibold">@(post.User?.FullName ?? "User")</span>
+                                    <span class="text-muted" style="font-size:0.7rem;display:block">@post.PostedAt.ToString("MMM dd, yyyy")</span>
+                                </div>
+                            </div>
+                            <span class="tag @(post.Category=="Advice"?"tag-blue":post.Category=="Question"?"tag-gold":post.Category=="Experience"?"tag-green":"tag-purple")">@post.Category</span>
+                        </div>
+                        <p class="text-primary mt-2 mb-3" style="color:var(--text-primary)!important">@post.Content</p>
+                        <form asp-action="Like" method="post" class="d-inline">
+                            <input type="hidden" name="postId" value="@post.Id" />
+                            <button type="submit" class="btn btn-sm" style="background:rgba(79,110,247,0.1);border:1px solid rgba(79,110,247,0.3);color:var(--accent-blue-light)">
+                                <i class="bi bi-heart me-1"></i>@post.Likes
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

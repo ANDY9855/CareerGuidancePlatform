@@ -1,0 +1,77 @@
+@model List<CareerGuidancePlatform.Models.Resource>
+@{ ViewData["Title"] = "Learning Resources"; }
+
+<div class="page-header">
+    <div class="container">
+        <span class="section-badge">Skill Development</span>
+        <h1 class="text-white fw-bold mt-2">Learning Resources Library</h1>
+        <p class="text-muted">Curated courses, books, articles and tutorials across all industries</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <!-- Filters -->
+        <div class="card-glass mb-5">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input name="search" class="form-control" placeholder="Search resources..." value="@ViewBag.Search" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Type</label>
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        @foreach (var t in (List<string>)ViewBag.Types)
+                        { <option value="@t" selected="@(ViewBag.SelectedType==t)">@t</option> }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Industry</label>
+                    <select name="industry" class="form-select">
+                        <option value="">All Industries</option>
+                        @foreach (var i in (List<string>)ViewBag.Industries)
+                        { <option value="@i" selected="@(ViewBag.SelectedIndustry==i)">@i</option> }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var r in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <a asp-action="Detail" asp-route-id="@r.Id" style="text-decoration:none">
+                        <div class="card-glass h-100">
+                            <div class="d-flex gap-2 mb-3 flex-wrap">
+                                <span class="tag @(r.Type=="Course"?"tag-blue":r.Type=="Book"?"tag-gold":r.Type=="Article"?"tag-green":"tag-purple")">@r.Type</span>
+                                @if (r.IsFree) { <span class="tag tag-green">Free</span> }
+                                <span class="tag tag-blue">@(r.DifficultyLevel==1?"Beginner":r.DifficultyLevel==2?"Intermediate":"Advanced")</span>
+                            </div>
+                            <h6 class="text-white fw-semibold mb-1">@r.Title</h6>
+                            <p class="text-muted small mb-3">@r.Provider</p>
+                            <p class="text-muted small">@(r.Description.Length > 90 ? r.Description[..90] + "..." : r.Description)</p>
+                            @if (r.Duration != null)
+                            { <p class="text-muted small mt-2"><i class="bi bi-clock me-1"></i>@r.Duration</p> }
+                            <div class="mt-auto pt-3">
+                                <span class="text-gradient small fw-semibold">View Details →</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-search fs-1 text-muted mb-3 d-block"></i>
+                <h5 class="text-muted">No resources found</h5>
+                <a asp-action="Index" class="btn btn-outline-primary mt-3">Clear Filters</a>
+            </div>
+        }
+    </div>
+</section>

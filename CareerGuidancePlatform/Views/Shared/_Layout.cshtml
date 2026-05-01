@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Career Guidance Platform - Personalized career assessments, mentorship, and skill development resources." />
+    <title>@ViewData["Title"] - CareerPath</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-compass me-2"></i>CareerPath
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav mx-auto gap-1">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Assessment" asp-action="Index"><i class="bi bi-clipboard-check me-1"></i>Assessment</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Resources" asp-action="Index"><i class="bi bi-book me-1"></i>Resources</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Mentorship" asp-action="Index"><i class="bi bi-people me-1"></i>Mentors</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="CareerPath" asp-action="Index"><i class="bi bi-map me-1"></i>Career Paths</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Jobs" asp-action="Index"><i class="bi bi-briefcase me-1"></i>Jobs</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Goals" asp-action="Index"><i class="bi bi-bullseye me-1"></i>Goals</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Networking" asp-action="Events"><i class="bi bi-calendar-event me-1"></i>Network</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Resume" asp-action="Builder"><i class="bi bi-file-person me-1"></i>Resume</a></li>
+                </ul>
+                <div class="d-flex gap-2 align-items-center">
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                        <span class="text-light small"><i class="bi bi-person-circle me-1"></i>@User.Identity.Name?.Split('@')[0]</span>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-sm">Login</a>
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-sm">Get Started</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert-toast alert-toast-success">
+                <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert-toast alert-toast-error">
+                <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row g-4 py-5">
+                <div class="col-lg-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-compass me-2 text-primary"></i>CareerPath</h5>
+                    <p class="text-muted small">Empowering individuals to make informed career decisions through personalized assessments, mentorship, and skill development resources.</p>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-semibold mb-3">Explore</h6>
+                    <ul class="list-unstyled small">
+                        <li><a asp-controller="Assessment" asp-action="Index" class="footer-link">Career Assessment</a></li>
+                        <li><a asp-controller="Resources" asp-action="Index" class="footer-link">Resources</a></li>
+                        <li><a asp-controller="CareerPath" asp-action="Index" class="footer-link">Career Paths</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-semibold mb-3">Connect</h6>
+                    <ul class="list-unstyled small">
+                        <li><a asp-controller="Mentorship" asp-action="Index" class="footer-link">Find a Mentor</a></li>
+                        <li><a asp-controller="Networking" asp-action="Events" class="footer-link">Events</a></li>
+                        <li><a asp-controller="Networking" asp-action="Community" class="footer-link">Community</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-semibold mb-3">Tools</h6>
+                    <ul class="list-unstyled small">
+                        <li><a asp-controller="Jobs" asp-action="Index" class="footer-link">Job Board</a></li>
+                        <li><a asp-controller="Goals" asp-action="Index" class="footer-link">Goals</a></li>
+                        <li><a asp-controller="Resume" asp-action="Builder" class="footer-link">Resume Builder</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-semibold mb-3">Account</h6>
+                    <ul class="list-unstyled small">
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <li><a asp-controller="Goals" asp-action="Index" class="footer-link">Dashboard</a></li>
+                            <li><a asp-controller="Jobs" asp-action="Tracker" class="footer-link">Application Tracker</a></li>
+                        }
+                        else
+                        {
+                            <li><a asp-controller="Account" asp-action="Register" class="footer-link">Register</a></li>
+                            <li><a asp-controller="Account" asp-action="Login" class="footer-link">Login</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="border-top border-secondary pt-3 pb-3 text-center text-muted small">
+                &copy; 2026 CareerPath. Aptech eProject — Semester 3. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

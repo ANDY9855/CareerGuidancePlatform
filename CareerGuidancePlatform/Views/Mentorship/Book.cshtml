@@ -1,0 +1,43 @@
+@model CareerGuidancePlatform.Models.BookSessionViewModel
+@{ ViewData["Title"] = "Book a Session"; var mentor = ViewBag.Mentor as CareerGuidancePlatform.Models.Mentor; }
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold">Book a Session</h1>
+        <p class="text-muted">with @mentor?.Name — @mentor?.Specialization</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card-glass">
+                    <form asp-action="Book" method="post">
+                        <input asp-for="MentorId" type="hidden" />
+                        <div class="mb-3">
+                            <label class="form-label">Session Type</label>
+                            <select asp-for="SessionType" class="form-select">
+                                <option value="Video">Video Call</option>
+                                <option value="Message">Messaging</option>
+                                <option value="Group">Group Session</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Topic / Agenda</label>
+                            <input asp-for="Topic" class="form-control" placeholder="e.g. Resume review, Interview prep, Career switch advice..." required />
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Preferred Date & Time</label>
+                            <input asp-for="ScheduledAt" class="form-control" type="datetime-local" required />
+                            <span class="text-muted small">Mentor availability: @mentor?.Availability</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <i class="bi bi-calendar-check me-2"></i>Confirm Booking
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

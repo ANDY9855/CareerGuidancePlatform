@@ -1,0 +1,68 @@
+@model List<CareerGuidancePlatform.Models.JobApplication>
+@{ ViewData["Title"] = "Application Tracker"; }
+
+<div class="page-header">
+    <div class="container">
+        <span class="section-badge">My Applications</span>
+        <h1 class="text-white fw-bold mt-2">Application Tracker</h1>
+        <p class="text-muted">Track all your job applications in one place</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-briefcase fs-1 text-muted d-block mb-3"></i>
+                <h5 class="text-muted">No applications yet</h5>
+                <a asp-action="Index" class="btn btn-primary mt-3">Browse Jobs</a>
+            </div>
+        }
+        else
+        {
+            <!-- Stats Row -->
+            <div class="row g-3 mb-5">
+                @{
+                    var statuses = new[] { "Applied","Interview","Offer","Rejected" };
+                    var colors = new[] { "tag-blue","tag-purple","tag-green","tag-red" };
+                }
+                @for(int i=0;i<statuses.Length;i++)
+                {
+                    var count = Model.Count(a => a.Status == statuses[i]);
+                    <div class="col-6 col-md-3">
+                        <div class="card-glass text-center">
+                            <span class="@colors[i] tag mb-2">@statuses[i]</span>
+                            <div class="text-white fw-bold" style="font-size:2rem">@count</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @foreach (var app in Model)
+            {
+                <div class="card-glass mb-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="text-white fw-semibold mb-1">@app.JobListing?.Title</h6>
+                            <p class="text-muted small mb-0"><i class="bi bi-building me-1"></i>@app.JobListing?.Company &nbsp;|&nbsp; <i class="bi bi-geo-alt me-1"></i>@app.JobListing?.Location</p>
+                            <p class="text-muted small"><i class="bi bi-calendar me-1"></i>Applied: @app.AppliedAt.ToString("MMM dd, yyyy")</p>
+                        </div>
+                        <div class="col-md-3 text-md-center mt-2 mt-md-0">
+                            <span class="tag @(app.Status=="Applied"?"tag-blue":app.Status=="Interview"?"tag-purple":app.Status=="Offer"?"tag-green":"tag-red")">@app.Status</span>
+                        </div>
+                        <div class="col-md-3 text-md-end mt-2 mt-md-0">
+                            <form asp-action="UpdateStatus" method="post" class="d-flex gap-2 justify-content-md-end">
+                                <input type="hidden" name="appId" value="@app.Id" />
+                                <select name="status" class="form-select form-select-sm" style="max-width:130px">
+                                    @foreach (var s in statuses) { <option value="@s" selected="@(app.Status==s)">@s</option> }
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>

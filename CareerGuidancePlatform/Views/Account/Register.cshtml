@@ -1,0 +1,70 @@
+@model RegisterViewModel
+@{ ViewData["Title"] = "Create Account"; }
+
+<div style="min-height:100vh;display:flex;align-items:center;background:var(--gradient-hero);padding:4rem 0">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card-glass p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="feature-icon mx-auto mb-3"><i class="bi bi-person-plus"></i></div>
+                        <h2 class="text-white fw-bold">Create Your Account</h2>
+                        <p class="text-muted small">Start your career journey today — it's free</p>
+                    </div>
+                    <form asp-action="Register" method="post">
+                        <div asp-validation-summary="All" class="alert-toast alert-toast-error position-static mb-3" style="position:static!important"></div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Full Name</label>
+                                <input asp-for="FullName" class="form-control" placeholder="John Doe" required />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Email Address</label>
+                                <input asp-for="Email" class="form-control" type="email" placeholder="john@example.com" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Current Role</label>
+                                <select asp-for="CurrentRole" class="form-select">
+                                    <option value="">Select...</option>
+                                    <option>Student</option>
+                                    <option>Fresh Graduate</option>
+                                    <option>Working Professional</option>
+                                    <option>Career Switcher</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Industry of Interest</label>
+                                <select asp-for="Industry" class="form-select">
+                                    <option value="">Select...</option>
+                                    <option>Technology</option>
+                                    <option>Design</option>
+                                    <option>Data Science</option>
+                                    <option>Management</option>
+                                    <option>Security</option>
+                                    <option>Finance</option>
+                                    <option>Healthcare</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Password</label>
+                                <input asp-for="Password" class="form-control" type="password" placeholder="Min 6 characters" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Confirm Password</label>
+                                <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Repeat password" required />
+                            </div>
+                            <div class="col-12 mt-2">
+                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                    <i class="bi bi-person-check me-2"></i>Create Account
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <p class="text-center text-muted small mt-3 mb-0">
+                        Already have an account? <a asp-controller="Account" asp-action="Login" class="text-gradient">Sign in</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
