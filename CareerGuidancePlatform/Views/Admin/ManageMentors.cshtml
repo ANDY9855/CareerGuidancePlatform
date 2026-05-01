@@ -1,0 +1,56 @@
+@model IEnumerable<CareerGuidancePlatform.Models.Mentor>
+@{ ViewData["Title"] = "Manage Mentors"; }
+
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="text-white fw-bold"><a asp-action="Index" class="text-white text-decoration-none"><i class="bi bi-arrow-left me-2 fs-4"></i></a>Manage Mentors</h1>
+            <p class="text-muted">Review, approve, or remove mentors</p>
+        </div>
+    </div>
+</div>
+
+<section class="container mb-5">
+    <div class="card-glass">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Mentor</th>
+                        <th>Specialization</th>
+                        <th>Rating</th>
+                        <th>Total Sessions</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var mentor in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@mentor.Name</strong><br />
+                                <small class="text-muted">@mentor.Email</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-gold text-dark mb-1">@mentor.Specialization</span><br />
+                                <small class="text-muted">@mentor.YearsOfExperience Years Exp</small>
+                            </td>
+                            <td>
+                                <span class="text-gold"><i class="bi bi-star-fill"></i> @mentor.Rating</span>
+                            </td>
+                            <td>@mentor.TotalSessions</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-controller="Mentors" asp-action="Profile" asp-route-id="@mentor.Id" class="btn btn-sm btn-outline-info" target="_blank"><i class="bi bi-eye"></i> View</a>
+                                    <form asp-action="DeleteMentor" asp-route-id="@mentor.Id" method="post" onsubmit="return confirm('Are you sure you want to permanently remove this mentor?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

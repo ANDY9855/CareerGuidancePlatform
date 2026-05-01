@@ -1,0 +1,52 @@
+@model IEnumerable<CareerGuidancePlatform.Models.JobListing>
+@{ ViewData["Title"] = "Manage Jobs"; }
+
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="text-white fw-bold"><a asp-action="Index" class="text-white text-decoration-none"><i class="bi bi-arrow-left me-2 fs-4"></i></a>Manage Jobs</h1>
+            <p class="text-muted">Delete or review platform job listings</p>
+        </div>
+        <a asp-controller="Jobs" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Post New Job</a>
+    </div>
+</div>
+
+<section class="container mb-5">
+    <div class="card-glass">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Location</th>
+                        <th>Posted Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var job in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@job.Title</strong><br />
+                                <small class="text-muted"><i class="bi bi-briefcase me-1"></i>@job.Type</small>
+                            </td>
+                            <td>@job.Company</td>
+                            <td>@job.Location</td>
+                            <td>@job.PostedAt.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="btn btn-sm btn-outline-info" target="_blank"><i class="bi bi-eye"></i> View</a>
+                                    <form asp-action="DeleteJob" asp-route-id="@job.Id" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this job listing?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

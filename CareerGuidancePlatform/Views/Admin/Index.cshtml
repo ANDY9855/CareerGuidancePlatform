@@ -1,0 +1,73 @@
+@model IEnumerable<CareerGuidancePlatform.Models.PeerPost>
+@{ ViewData["Title"] = "Admin Dashboard"; }
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold">👑 Admin Control Panel</h1>
+        <p class="text-muted">Manage the platform data and monitor activities.</p>
+    </div>
+</div>
+
+<section class="container mb-5">
+    <!-- Stat Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card-glass text-center p-4">
+                <i class="bi bi-people-fill text-gold fs-1 mb-2"></i>
+                <h2 class="text-white fw-bold">@ViewBag.TotalUsers</h2>
+                <p class="text-muted mb-0">Total Users</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-glass text-center p-4">
+                <i class="bi bi-briefcase-fill text-gold fs-1 mb-2"></i>
+                <h2 class="text-white fw-bold">@ViewBag.TotalJobs</h2>
+                <p class="text-muted mb-0">Active Jobs</p>
+                <a asp-action="ManageJobs" class="btn btn-sm btn-outline-primary mt-3">Manage Jobs</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-glass text-center p-4">
+                <i class="bi bi-person-video3 text-gold fs-1 mb-2"></i>
+                <h2 class="text-white fw-bold">@ViewBag.TotalMentors</h2>
+                <p class="text-muted mb-0">Active Mentors</p>
+                <a asp-action="ManageMentors" class="btn btn-sm btn-outline-primary mt-3">Manage Mentors</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-glass text-center p-4">
+                <i class="bi bi-calendar-check-fill text-gold fs-1 mb-2"></i>
+                <h2 class="text-white fw-bold">@ViewBag.TotalSessions</h2>
+                <p class="text-muted mb-0">Booked Sessions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <h3 class="text-white mb-4"><i class="bi bi-activity text-gold me-2"></i>Recent Community Activity</h3>
+    <div class="card-glass">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Post Content</th>
+                        <th>Likes</th>
+                        <th>Posted At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var post in Model)
+                    {
+                        <tr>
+                            <td>@(post.User?.FullName ?? "Unknown")</td>
+                            <td>@(post.Content.Length > 50 ? post.Content.Substring(0, 50) + "..." : post.Content)</td>
+                            <td><span class="badge bg-gold text-dark">@post.Likes <i class="bi bi-heart-fill"></i></span></td>
+                            <td>@post.PostedAt.ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

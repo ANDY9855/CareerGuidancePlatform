@@ -41,6 +41,16 @@ namespace CareerGuidancePlatform.Controllers
                 .Include(r => r.Certifications)
                 .FirstOrDefaultAsync(r => r.UserId == user!.Id);
 
+            model.FullName ??= string.Empty;
+            model.Email ??= string.Empty;
+            model.Phone ??= string.Empty;
+            model.Location ??= string.Empty;
+            model.LinkedIn ??= string.Empty;
+            model.Portfolio ??= string.Empty;
+            model.Summary ??= string.Empty;
+            model.Skills ??= string.Empty;
+            model.Template ??= "Classic";
+
             if (existing == null)
             {
                 model.UserId = user!.Id;

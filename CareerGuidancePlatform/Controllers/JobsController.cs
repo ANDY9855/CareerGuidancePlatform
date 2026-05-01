@@ -71,5 +71,27 @@ namespace CareerGuidancePlatform.Controllers
             if (app != null) { app.Status = status; await _db.SaveChangesAsync(); }
             return RedirectToAction("Tracker");
         }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> Create(JobListing model)
+        {
+            if (ModelState.IsValid)
+            {
+                model.PostedAt = DateTime.UtcNow;
+                model.IsActive = true;
+                _db.JobListings.Add(model);
+                await _db.SaveChangesAsync();
+                TempData["Success"] = "Job successfully posted!";
+                return RedirectToAction("ManageJobs", "Admin");
+            }
+            return View(model);
+        }
     }
 }

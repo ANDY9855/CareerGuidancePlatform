@@ -1,0 +1,83 @@
+@model CareerGuidancePlatform.Models.JobListing
+@{ ViewData["Title"] = "Post New Job"; }
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold"><a asp-controller="Admin" asp-action="ManageJobs" class="text-white text-decoration-none"><i class="bi bi-arrow-left me-2 fs-4"></i></a>Post New Job</h1>
+        <p class="text-muted">Publish a new job opportunity to the platform</p>
+    </div>
+</div>
+
+<section class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-glass">
+                <form asp-action="Create" method="post">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Job Title</label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. Senior Backend Developer" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Company</label>
+                            <input asp-for="Company" class="form-control" placeholder="e.g. Google" required />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Location</label>
+                            <input asp-for="Location" class="form-control" placeholder="e.g. Remote, or New York" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Job Type</label>
+                            <select asp-for="Type" class="form-select">
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Freelance">Freelance</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Industry</label>
+                            <input asp-for="Industry" class="form-control" placeholder="e.g. Technology, Design, Finance" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Salary Range</label>
+                            <input asp-for="SalaryRange" class="form-control" placeholder="e.g. $100k - $120k / year" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="What will this person do?" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Requirements</label>
+                        <textarea asp-for="Requirements" class="form-control" rows="3" placeholder="What skills are required?" required></textarea>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Application Deadline</label>
+                            <input asp-for="Deadline" type="date" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Company Logo URL (Optional)</label>
+                            <input asp-for="CompanyLogo" class="form-control" placeholder="https://..." />
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-briefcase-fill me-2"></i>Publish Job Listing</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

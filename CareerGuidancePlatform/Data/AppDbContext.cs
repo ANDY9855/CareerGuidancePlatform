@@ -33,6 +33,20 @@ namespace CareerGuidancePlatform.Data
         {
             base.OnModelCreating(builder);
 
+            // Fix for SQL Server 900-byte index limit warning on Identity Tables
+            builder.Entity<ApplicationUser>(b => b.Property(u => u.Id).HasMaxLength(128));
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityRole>(b => b.Property(r => r.Id).HasMaxLength(128));
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserLogin<string>>(b =>
+            {
+                b.Property(l => l.LoginProvider).HasMaxLength(128);
+                b.Property(l => l.ProviderKey).HasMaxLength(128);
+            });
+            builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserToken<string>>(b =>
+            {
+                b.Property(t => t.LoginProvider).HasMaxLength(128);
+                b.Property(t => t.Name).HasMaxLength(128);
+            });
+
             builder.Entity<AssessmentResult>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.AssessmentResults)
