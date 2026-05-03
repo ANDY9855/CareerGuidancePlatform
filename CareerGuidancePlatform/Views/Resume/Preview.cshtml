@@ -1,101 +1,311 @@
 @model CareerGuidancePlatform.Models.ResumeData
-@{ ViewData["Title"] = "Resume Preview"; Layout = null; }
+@{
+    ViewData["Title"] = "Resume Preview";
+    Layout = null;
+    
+    // Get Initials for Avatar
+    var initials = "";
+    if (!string.IsNullOrEmpty(Model.FullName))
+    {
+        var parts = Model.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length > 0) initials += parts[0][0];
+        if (parts.Length > 1) initials += parts[parts.Length - 1][0];
+    }
+    initials = initials.ToUpper();
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@Model.FullName - Resume</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    <title>@Model.FullName - CV Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        * { margin:0;padding:0;box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; background:#f5f5f5; }
-        .resume { max-width:800px; margin:2rem auto; background:white; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
-        .header { background:@(Model.Template=="Creative"?"linear-gradient(135deg,#7c5cf7,#4f6ef7)":Model.Template=="Classic"?"#2d3748":"linear-gradient(135deg,#0a1628,#1a3460)"); color:white; padding:2.5rem; }
-        .header h1 { font-size:2rem; font-weight:800; }
-        .header p { opacity:0.8; margin-top:0.25rem; font-size:0.9rem; }
-        .contact { display:flex; gap:1.5rem; margin-top:1rem; flex-wrap:wrap; }
-        .contact span { font-size:0.82rem; opacity:0.85; }
-        .body { padding:2rem; }
-        .section { margin-bottom:1.75rem; }
-        .section-title { font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#4f6ef7; border-bottom:2px solid #4f6ef7; padding-bottom:0.4rem; margin-bottom:1rem; }
-        .summary { font-size:0.9rem; color:#4a5568; line-height:1.7; }
-        .skills { display:flex; flex-wrap:wrap; gap:0.5rem; }
-        .skill-tag { background:#eef2ff; color:#4f6ef7; padding:0.25rem 0.75rem; border-radius:50px; font-size:0.78rem; font-weight:600; }
-        .exp-item, .edu-item, .cert-item { margin-bottom:1.25rem; }
-        .exp-item h4, .edu-item h4, .cert-item h4 { font-size:0.95rem; font-weight:700; color:#1a202c; }
-        .exp-item .company, .edu-item .institution { font-size:0.85rem; color:#4f6ef7; font-weight:600; }
-        .exp-item .dates, .edu-item .year { font-size:0.78rem; color:#718096; }
-        .exp-item .desc { font-size:0.85rem; color:#4a5568; margin-top:0.4rem; line-height:1.6; }
-        .no-print { text-align:center; padding:1.5rem; background:#f0f0f0; }
-        .no-print a { margin:0 0.5rem; }
-        @@media print { .no-print { display:none; } body { background:white; } .resume { box-shadow:none; margin:0; } }
+        :root {
+            /* Theme: Modern (Tech/Corporate) */
+            --theme-modern-side: #0f172a;
+            --theme-modern-sidetext: #f8fafc;
+            --theme-modern-accent: #3b82f6;
+            --theme-modern-font: 'Plus Jakarta Sans', sans-serif;
+            
+            /* Theme: Classic (Academic/Finance) */
+            --theme-classic-side: #f1f5f9;
+            --theme-classic-sidetext: #1e293b;
+            --theme-classic-accent: #0f172a;
+            --theme-classic-font: 'Playfair Display', serif;
+            
+            /* Theme: Creative (Design/Marketing) */
+            --theme-creative-side: #2e1065;
+            --theme-creative-sidetext: #ffffff;
+            --theme-creative-accent: #f43f5e;
+            --theme-creative-font: 'Outfit', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #cbd5e1; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        
+        .no-print { text-align: center; padding: 1.5rem; background: #1e293b; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .no-print a { margin: 0 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; color: white; }
+        .btn-print { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .btn-print:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .btn-edit { background: rgba(255,255,255,0.1); }
+        .btn-edit:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+
+        /* The A4 Document Container */
+        .cv-document {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 2rem auto;
+            background: #ffffff;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            display: flex;
+            position: relative;
+        }
+
+        @@media print {
+            .no-print { display: none !important; }
+            body { background: white; margin: 0; padding: 0; }
+            .cv-document { margin: 0; box-shadow: none; width: 210mm; min-height: 297mm; }
+        }
+
+        /* Apply Theme Variables */
+        .theme-Modern {
+            --side-bg: var(--theme-modern-side);
+            --side-text: var(--theme-modern-sidetext);
+            --accent: var(--theme-modern-accent);
+            --font-main: var(--theme-modern-font);
+            --font-head: var(--theme-modern-font);
+        }
+        .theme-Classic {
+            --side-bg: var(--theme-classic-side);
+            --side-text: var(--theme-classic-sidetext);
+            --accent: var(--theme-classic-accent);
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-head: var(--theme-classic-font);
+        }
+        .theme-Creative {
+            --side-bg: var(--theme-creative-side);
+            --side-text: var(--theme-creative-sidetext);
+            --accent: var(--theme-creative-accent);
+            --font-main: var(--theme-creative-font);
+            --font-head: var(--theme-creative-font);
+        }
+
+        /* Apply Fonts */
+        .cv-document { font-family: var(--font-main); color: #334155; }
+        .heading-font { font-family: var(--font-head); }
+
+        /* Layout Structure */
+        .sidebar {
+            width: 70mm;
+            background: var(--side-bg);
+            color: var(--side-text);
+            padding: 12mm 8mm;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            width: 140mm;
+            padding: 12mm 12mm;
+            background: #ffffff;
+        }
+
+        /* Sidebar Elements */
+        .avatar-wrapper { display: flex; justify-content: center; margin-bottom: 8mm; }
+        .avatar {
+            width: 30mm; height: 30mm; border-radius: 50%;
+            background: var(--accent); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11mm; font-weight: 700; font-family: var(--font-head);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+        .avatar-img {
+            width: 30mm; height: 30mm; border-radius: 50%; object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+        .theme-Classic .avatar, .theme-Classic .avatar-img { background: white; color: var(--accent); border-color: var(--accent); }
+
+        .side-section { margin-bottom: 8mm; page-break-inside: avoid; }
+        .side-title {
+            font-size: 4mm; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+            margin-bottom: 4mm; color: var(--side-text);
+            border-bottom: 2px solid var(--accent); padding-bottom: 1.5mm; display: inline-block;
+        }
+        
+        .contact-list { display: flex; flex-direction: column; gap: 3.5mm; }
+        .contact-item { display: flex; align-items: center; gap: 3mm; font-size: 3mm; line-height: 1.4; word-break: break-word; }
+        .contact-item i {
+            width: 6mm; height: 6mm; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.1); color: var(--accent); font-size: 2.8mm; flex-shrink: 0;
+        }
+        .theme-Classic .contact-item i { background: rgba(0,0,0,0.05); }
+
+        .skills-list { display: flex; flex-wrap: wrap; gap: 2mm; }
+        .skill-pill {
+            padding: 1.2mm 3mm; border-radius: 4mm; font-size: 2.8mm; font-weight: 500;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05);
+        }
+        .theme-Modern .skill-pill { background: var(--accent); color: white; border: none; }
+        .theme-Classic .skill-pill { background: white; border: 1px solid #cbd5e1; color: var(--side-text); }
+
+        .side-item { margin-bottom: 4mm; }
+        .side-item-title { font-size: 3.2mm; font-weight: 700; margin-bottom: 0.5mm; }
+        .side-item-sub { font-size: 2.8mm; opacity: 0.85; margin-bottom: 0.5mm; }
+        .side-item-date { font-size: 2.6mm; color: var(--accent); font-weight: 600; }
+
+        /* Main Content Elements */
+        .header-main { margin-bottom: 10mm; }
+        .full-name {
+            font-size: 11mm; font-weight: 800; line-height: 1.1; color: #0f172a; margin-bottom: 2mm; letter-spacing: -0.5px; text-transform: uppercase;
+        }
+        .theme-Classic .full-name { color: var(--accent); letter-spacing: 0; text-transform: none; }
+        .theme-Creative .full-name { background: linear-gradient(135deg, var(--accent), #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .main-section { margin-bottom: 8mm; }
+        .main-title {
+            font-size: 5mm; font-weight: 800; color: #0f172a; margin-bottom: 5mm;
+            display: flex; align-items: center; gap: 2.5mm; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .theme-Classic .main-title { color: var(--accent); text-transform: none; font-size: 6mm; font-weight: 700; border-bottom: 1px solid #cbd5e1; padding-bottom: 2mm; }
+        .main-title i { color: var(--accent); font-size: 4.5mm; }
+
+        .summary-text { font-size: 3.4mm; line-height: 1.8; color: #475569; text-align: justify; }
+
+        /* Timeline for Experience */
+        .timeline { position: relative; padding-left: 6mm; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 2mm; bottom: 0; width: 0.5mm; background: #e2e8f0; }
+        .timeline-item { position: relative; margin-bottom: 7mm; page-break-inside: avoid; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -6.25mm; top: 1.5mm; width: 3mm; height: 3mm; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 0 1mm white, 0 0 0 2mm rgba(59,130,246,0.2);
+        }
+        .theme-Classic .timeline-item::before { box-shadow: 0 0 0 1mm white, 0 0 0 1.5mm var(--accent); }
+        .theme-Creative .timeline-item::before { box-shadow: 0 0 0 1mm white, 0 0 0 2mm rgba(244, 63, 94, 0.2); }
+
+        .job-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1mm; }
+        .job-title { font-size: 4.2mm; font-weight: 700; color: #1e293b; }
+        .theme-Classic .job-title { font-family: var(--font-head); font-size: 4.8mm; color: var(--accent); }
+        .job-date { font-size: 2.8mm; font-weight: 600; color: var(--accent); background: rgba(0,0,0,0.03); padding: 1mm 2.5mm; border-radius: 4mm; }
+        
+        .job-company { font-size: 3.2mm; font-weight: 600; color: #64748b; margin-bottom: 2mm; display: flex; align-items: center; gap: 1.5mm; }
+        .job-desc { font-size: 3.3mm; line-height: 1.7; color: #475569; }
+
+        /* Creative Theme Extra Flair */
+        .theme-Creative .sidebar { position: relative; overflow: hidden; }
+        .theme-Creative .sidebar::after { content: ''; position: absolute; bottom: -20mm; right: -20mm; width: 60mm; height: 60mm; background: rgba(255,255,255,0.05); border-radius: 50%; pointer-events: none; }
     </style>
 </head>
-<body>
+<body class="theme-@Model.Template">
     <div class="no-print">
-        <a href="javascript:window.print()" style="background:#4f6ef7;color:white;padding:0.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600">🖨 Print / Save as PDF</a>
-        <a asp-controller="Resume" asp-action="Builder" style="background:#0a1628;color:white;padding:0.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600">✏ Edit Resume</a>
+        <a href="javascript:window.print()" class="btn-print"><i class="fas fa-print"></i> Print High-Resolution PDF</a>
+        <a asp-controller="Resume" asp-action="Builder" class="btn-edit"><i class="fas fa-edit"></i> Edit Details</a>
     </div>
-    <div class="resume">
-        <div class="header">
-            <h1>@Model.FullName</h1>
-            <div class="contact">
-                @if (!string.IsNullOrEmpty(Model.Email)) { <span>✉ @Model.Email</span> }
-                @if (!string.IsNullOrEmpty(Model.Phone)) { <span>📞 @Model.Phone</span> }
-                @if (!string.IsNullOrEmpty(Model.Location)) { <span>📍 @Model.Location</span> }
-                @if (!string.IsNullOrEmpty(Model.LinkedIn)) { <span>🔗 @Model.LinkedIn</span> }
+
+    <div class="cv-document">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="avatar-wrapper">
+                @if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
+                {
+                    <img src="@Model.ProfilePicturePath" class="avatar-img" alt="Profile Picture" />
+                }
+                else
+                {
+                    <div class="avatar">
+                        <i class="fas fa-user" style="font-size: 15mm; opacity: 0.9;"></i>
+                    </div>
+                }
             </div>
-        </div>
-        <div class="body">
-            @if (!string.IsNullOrEmpty(Model.Summary)) {
-            <div class="section">
-                <div class="section-title">Professional Summary</div>
-                <p class="summary">@Model.Summary</p>
+
+            <div class="side-section">
+                <div class="side-title">Contact</div>
+                <div class="contact-list">
+                    @if (!string.IsNullOrEmpty(Model.Email)) { <div class="contact-item"><i class="fas fa-envelope"></i> <span>@Model.Email</span></div> }
+                    @if (!string.IsNullOrEmpty(Model.Phone)) { <div class="contact-item"><i class="fas fa-phone"></i> <span>@Model.Phone</span></div> }
+                    @if (!string.IsNullOrEmpty(Model.Location)) { <div class="contact-item"><i class="fas fa-map-marker-alt"></i> <span>@Model.Location</span></div> }
+                    @if (!string.IsNullOrEmpty(Model.LinkedIn)) { <div class="contact-item"><i class="fab fa-linkedin-in"></i> <span>@Model.LinkedIn</span></div> }
+                </div>
             </div>
-            }
+
             @if (!string.IsNullOrEmpty(Model.Skills)) {
-            <div class="section">
-                <div class="section-title">Skills</div>
-                <div class="skills">
-                    @foreach (var s in Model.Skills.Split(',')) { <span class="skill-tag">@s.Trim()</span> }
+                <div class="side-section">
+                    <div class="side-title">Expertise</div>
+                    <div class="skills-list">
+                        @foreach (var s in Model.Skills.Split(',')) { <span class="skill-pill">@s.Trim()</span> }
+                    </div>
                 </div>
-            </div>
             }
-            @if (Model.Experiences.Any()) {
-            <div class="section">
-                <div class="section-title">Work Experience</div>
-                @foreach (var e in Model.Experiences) {
-                <div class="exp-item">
-                    <h4>@e.JobTitle</h4>
-                    <div class="company">@e.Company</div>
-                    <div class="dates">@e.StartDate – @e.EndDate</div>
-                    @if (!string.IsNullOrEmpty(e.Description)) { <p class="desc">@e.Description</p> }
+
+            @if (Model.Educations != null && Model.Educations.Any()) {
+                <div class="side-section">
+                    <div class="side-title">Education</div>
+                    @foreach (var e in Model.Educations) {
+                        <div class="side-item">
+                            <div class="side-item-title">@e.Degree</div>
+                            <div class="side-item-sub">@e.Institution</div>
+                            <div class="side-item-date">@e.Year</div>
+                        </div>
+                    }
                 </div>
-                }
-            </div>
             }
-            @if (Model.Educations.Any()) {
-            <div class="section">
-                <div class="section-title">Education</div>
-                @foreach (var e in Model.Educations) {
-                <div class="edu-item">
-                    <h4>@e.Degree</h4>
-                    <div class="institution">@e.Institution</div>
-                    <div class="year">@e.Year</div>
+
+            @if (Model.Certifications != null && Model.Certifications.Any()) {
+                <div class="side-section">
+                    <div class="side-title">Awards & Certs</div>
+                    @foreach (var c in Model.Certifications) {
+                        <div class="side-item">
+                            <div class="side-item-title">@c.Name</div>
+                            <div class="side-item-sub">@c.IssuedBy</div>
+                            <div class="side-item-date">@c.Year</div>
+                        </div>
+                    }
                 </div>
-                }
-            </div>
             }
-            @if (Model.Certifications.Any()) {
-            <div class="section">
-                <div class="section-title">Certifications</div>
-                @foreach (var c in Model.Certifications) {
-                <div class="cert-item">
-                    <h4>@c.Name</h4>
-                    <div class="company">@c.IssuedBy — @c.Year</div>
-                </div>
-                }
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header-main">
+                <h1 class="full-name heading-font">@Model.FullName</h1>
             </div>
+
+            @if (!string.IsNullOrEmpty(Model.Summary)) {
+                <div class="main-section">
+                    <div class="main-title heading-font">
+                        @if(Model.Template != "Classic") { <i class="fas fa-user-circle"></i> }
+                        Professional Profile
+                    </div>
+                    <p class="summary-text">@Model.Summary</p>
+                </div>
+            }
+
+            @if (Model.Experiences != null && Model.Experiences.Any()) {
+                <div class="main-section">
+                    <div class="main-title heading-font">
+                        @if(Model.Template != "Classic") { <i class="fas fa-briefcase"></i> }
+                        Experience
+                    </div>
+                    <div class="timeline">
+                        @foreach (var e in Model.Experiences) {
+                            <div class="timeline-item">
+                                <div class="job-header">
+                                    <div class="job-title">@e.JobTitle</div>
+                                    <div class="job-date">@e.StartDate – @e.EndDate</div>
+                                </div>
+                                <div class="job-company"><i class="far fa-building"></i> @e.Company</div>
+                                @if (!string.IsNullOrEmpty(e.Description)) {
+                                    <div class="job-desc">@e.Description</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
             }
         </div>
     </div>

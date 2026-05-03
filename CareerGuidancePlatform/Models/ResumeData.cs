@@ -13,6 +13,7 @@ namespace CareerGuidancePlatform.Models
         public string? Portfolio { get; set; }
         public string Summary { get; set; } = string.Empty;
         public string Skills { get; set; } = string.Empty; // comma separated
+        public string? ProfilePicturePath { get; set; }
         public string Template { get; set; } = "Modern"; // Modern, Classic, Creative
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
         public ICollection<ResumeExperience> Experiences { get; set; } = new List<ResumeExperience>();

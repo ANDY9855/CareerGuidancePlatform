@@ -12,8 +12,14 @@ namespace CareerGuidancePlatform.Controllers
     {
         private readonly AppDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
-        public ResumeController(AppDbContext db, UserManager<ApplicationUser> userManager)
-        { _db = db; _userManager = userManager; }
+        private readonly IWebHostEnvironment _env;
+
+        public ResumeController(AppDbContext db, UserManager<ApplicationUser> userManager, IWebHostEnvironment env)
+        { 
+            _db = db; 
+            _userManager = userManager; 
+            _env = env;
+        }
 
         public async Task<IActionResult> Builder()
         {
@@ -29,7 +35,7 @@ namespace CareerGuidancePlatform.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(ResumeData model,
+        public async Task<IActionResult> Save(ResumeData model, IFormFile? profilePicture,
             List<string> jobTitles, List<string> companies, List<string> startDates, List<string> endDates, List<string> expDescriptions,
             List<string> degrees, List<string> institutions, List<string> years,
             List<string> certNames, List<string> certIssuers, List<string> certYears)
@@ -51,9 +57,24 @@ namespace CareerGuidancePlatform.Controllers
             model.Skills ??= string.Empty;
             model.Template ??= "Classic";
 
+            string? pfpPath = existing?.ProfilePicturePath;
+            if (profilePicture != null && profilePicture.Length > 0)
+            {
+                var folder = Path.Combine(_env.WebRootPath, "uploads", "resumes");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(profilePicture.FileName);
+                var filePath = Path.Combine(folder, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await profilePicture.CopyToAsync(stream);
+                }
+                pfpPath = "/uploads/resumes/" + fileName;
+            }
+
             if (existing == null)
             {
                 model.UserId = user!.Id;
+                model.ProfilePicturePath = pfpPath;
                 model.LastUpdated = DateTime.UtcNow;
                 _db.ResumeData.Add(model);
             }
@@ -68,6 +89,7 @@ namespace CareerGuidancePlatform.Controllers
                 existing.Summary = model.Summary;
                 existing.Skills = model.Skills;
                 existing.Template = model.Template;
+                existing.ProfilePicturePath = pfpPath;
                 existing.LastUpdated = DateTime.UtcNow;
                 existing.Experiences.Clear();
                 existing.Educations.Clear();

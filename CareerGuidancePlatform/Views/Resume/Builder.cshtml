@@ -1,6 +1,55 @@
 @model CareerGuidancePlatform.Models.ResumeData
 @{ ViewData["Title"] = "Resume Builder"; }
 
+<style>
+    /* Premium File Input Styling */
+    input[type="file"].form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    input[type="file"].form-control:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    input[type="file"].form-control::-webkit-file-upload-button {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        padding: 0.375rem 1rem;
+        margin-right: 1rem;
+        margin-top: -0.375rem;
+        margin-bottom: -0.375rem;
+        margin-left: -0.75rem;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    input[type="file"].form-control::-webkit-file-upload-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    input[type="file"].form-control::file-selector-button {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        padding: 0.375rem 1rem;
+        margin-right: 1rem;
+        margin-top: -0.375rem;
+        margin-bottom: -0.375rem;
+        margin-left: -0.75rem;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    input[type="file"].form-control::file-selector-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>
+
 <div class="page-header">
     <div class="container">
         <span class="section-badge">Career Tools</span>
@@ -11,7 +60,7 @@
 
 <section>
     <div class="container">
-        <form asp-action="Save" method="post" id="resumeForm">
+        <form asp-action="Save" method="post" id="resumeForm" enctype="multipart/form-data">
             <div class="row g-4">
                 <!-- Personal Info -->
                 <div class="col-12">
@@ -24,7 +73,8 @@
                             <div class="col-md-4"><label class="form-label">Location</label><input asp-for="Location" class="form-control" placeholder="Karachi, Pakistan" /></div>
                             <div class="col-md-4"><label class="form-label">LinkedIn</label><input asp-for="LinkedIn" class="form-control" placeholder="linkedin.com/in/yourname" /></div>
                             <div class="col-12"><label class="form-label">Professional Summary</label><textarea asp-for="Summary" class="form-control" rows="3" placeholder="Brief professional summary..."></textarea></div>
-                            <div class="col-12"><label class="form-label">Skills (comma-separated)</label><input asp-for="Skills" class="form-control" placeholder="Python, SQL, React, Leadership..." /></div>
+                            <div class="col-md-6"><label class="form-label">Skills (comma-separated)</label><input asp-for="Skills" class="form-control" placeholder="Python, SQL, React, Leadership..." /></div>
+                            <div class="col-md-6"><label class="form-label">Profile Picture (Optional)</label><input type="file" name="profilePicture" class="form-control" accept="image/*" /></div>
                             <div class="col-md-4">
                                 <label class="form-label">Template</label>
                                 <select asp-for="Template" class="form-select">
