@@ -1,0 +1,51 @@
+@model IEnumerable<CareerGuidancePlatform.Models.PeerPost>
+@{ ViewData["Title"] = "Manage Community Posts"; }
+@await Html.PartialAsync("_AdminNav")
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold mb-0"><i class="bi bi-chat-dots me-2 text-gradient-gold"></i>Community Posts</h1>
+        <p class="text-muted mb-0">@Model.Count() posts — admin can remove any inappropriate content</p>
+    </div>
+</div>
+
+<section class="container">
+    <div class="card-glass">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr><th>Author</th><th>Content</th><th>Category</th><th>Likes</th><th>Posted</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="text-white small fw-semibold">@p.User?.FullName</span><br>
+                                <span class="text-muted" style="font-size:0.72rem">@p.User?.Email</span>
+                            </td>
+                            <td>
+                                <span class="text-muted small">
+                                    @(p.Content.Length > 80 ? p.Content[..80] + "..." : p.Content)
+                                </span>
+                            </td>
+                            <td>
+                                <span class="tag @(p.Category=="Advice"?"tag-blue":p.Category=="Question"?"tag-gold":p.Category=="Experience"?"tag-green":"tag-purple")">
+                                    @p.Category
+                                </span>
+                            </td>
+                            <td><span class="tag tag-gold"><i class="bi bi-heart-fill me-1"></i>@p.Likes</span></td>
+                            <td><span class="text-muted small">@p.PostedAt.ToString("MMM dd, yyyy")</span></td>
+                            <td>
+                                <form asp-action="DeletePost" asp-route-id="@p.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('Remove this post?')">
+                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

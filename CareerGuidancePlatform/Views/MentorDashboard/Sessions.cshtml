@@ -1,0 +1,101 @@
+@model List<CareerGuidancePlatform.Models.MentorSession>
+@{ ViewData["Title"] = "My Sessions"; var statuses = new[] { "Pending","Confirmed","Completed","Cancelled" }; }
+@await Html.PartialAsync("_MentorNav")
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold mb-0"><i class="bi bi-calendar-check me-2" style="color:#06d6a0"></i>My Sessions</h1>
+        <p class="text-muted mb-0">@Model.Count total sessions booked with you</p>
+    </div>
+</div>
+
+<section class="container">
+    <!-- STATUS FILTER TABS -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        @foreach (var st in new[] { ("all","All","tag-blue"), ("Pending","Pending","tag-gold"), ("Confirmed","Confirmed","tag-green"), ("Completed","Completed","tag-blue"), ("Cancelled","Cancelled","tag-red") })
+        {
+            var cnt = st.Item1 == "all" ? Model.Count : Model.Count(s => s.Status == st.Item1);
+            <a href="#@st.Item1" class="tag @st.Item3 filter-btn" data-filter="@st.Item1" style="cursor:pointer;font-size:0.8rem;padding:0.4rem 1rem">@st.Item2 (@cnt)</a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-calendar-x fs-1 text-muted d-block mb-3"></i>
+            <h5 class="text-muted">No sessions yet</h5>
+        </div>
+    }
+
+    <div id="sessionList">
+        @foreach (var s in Model)
+        {
+            <div class="card-glass mb-3 session-card" data-status="@s.Status">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <div class="d-flex gap-2 mb-2">
+                            <span class="tag @(s.Status=="Confirmed"?"tag-green":s.Status=="Completed"?"tag-blue":s.Status=="Cancelled"?"tag-red":"tag-gold")">@s.Status</span>
+                            <span class="tag tag-purple">@s.SessionType</span>
+                        </div>
+                        <h6 class="text-white fw-semibold mb-1">@s.Topic</h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="mentor-avatar" style="width:28px;height:28px;font-size:0.72rem">@(s.User?.FullName?.FirstOrDefault() ?? 'U')</div>
+                            <span class="text-muted small">@s.User?.FullName</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mt-2 mt-md-0">
+                        <div class="text-muted small"><i class="bi bi-calendar me-1"></i>@s.ScheduledAt.ToString("MMM dd, yyyy")</div>
+                        <div class="text-muted small"><i class="bi bi-clock me-1"></i>@s.ScheduledAt.ToString("h:mm tt")</div>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <div class="d-flex gap-1 justify-content-md-end flex-wrap">
+                            @if (s.Status == "Pending")
+                            {
+                                <form asp-action="UpdateSession" method="post" class="d-inline">
+                                    <input type="hidden" name="sessionId" value="@s.Id" />
+                                    <input type="hidden" name="status" value="Confirmed" />
+                                    <button class="btn btn-sm btn-outline-success"><i class="bi bi-check-circle me-1"></i>Confirm</button>
+                                </form>
+                            }
+                            @if (s.Status == "Confirmed")
+                            {
+                                <form asp-action="UpdateSession" method="post" class="d-inline">
+                                    <input type="hidden" name="sessionId" value="@s.Id" />
+                                    <input type="hidden" name="status" value="Completed" />
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-check2-all me-1"></i>Complete</button>
+                                </form>
+                            }
+                            @if (s.Status != "Cancelled" && s.Status != "Completed")
+                            {
+                                <form asp-action="UpdateSession" method="post" class="d-inline"
+                                      onsubmit="return confirm('Cancel this session?')">
+                                    <input type="hidden" name="sessionId" value="@s.Id" />
+                                    <input type="hidden" name="status" value="Cancelled" />
+                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle me-1"></i>Cancel</button>
+                                </form>
+                            }
+                            <a asp-controller="Mentorship" asp-action="Chat" asp-route-mentorId="@s.MentorId"
+                               class="btn btn-sm btn-outline-primary" title="Chat with @s.User?.FullName">
+                                <i class="bi bi-chat-dots"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.preventDefault();
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.session-card').forEach(card => {
+            card.style.display = (filter === 'all' || card.dataset.status === filter) ? '' : 'none';
+        });
+    });
+});
+</script>
+}

@@ -1,45 +1,58 @@
 @model IEnumerable<CareerGuidancePlatform.Models.JobListing>
 @{ ViewData["Title"] = "Manage Jobs"; }
+@await Html.PartialAsync("_AdminNav")
 
 <div class="page-header">
-    <div class="container d-flex justify-content-between align-items-center">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h1 class="text-white fw-bold"><a asp-action="Index" class="text-white text-decoration-none"><i class="bi bi-arrow-left me-2 fs-4"></i></a>Manage Jobs</h1>
-            <p class="text-muted">Delete or review platform job listings</p>
+            <h1 class="text-white fw-bold mb-0"><i class="bi bi-briefcase me-2 text-gradient-gold"></i>Manage Jobs</h1>
+            <p class="text-muted mb-0">@Model.Count() total listings</p>
         </div>
-        <a asp-controller="Jobs" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Post New Job</a>
+        <a asp-action="CreateJob" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Post New Job</a>
     </div>
 </div>
 
-<section class="container mb-5">
+<section class="container">
     <div class="card-glass">
         <div class="table-responsive">
             <table class="table table-dark table-hover mb-0 align-middle">
                 <thead>
                     <tr>
-                        <th>Job Title</th>
-                        <th>Company</th>
-                        <th>Location</th>
-                        <th>Posted Date</th>
-                        <th>Actions</th>
+                        <th>Job Title</th><th>Company</th><th>Type</th>
+                        <th>Industry</th><th>Salary</th><th>Deadline</th>
+                        <th>Status</th><th>Apps</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var job in Model)
+                    @foreach (var j in Model)
                     {
                         <tr>
                             <td>
-                                <strong>@job.Title</strong><br />
-                                <small class="text-muted"><i class="bi bi-briefcase me-1"></i>@job.Type</small>
+                                <span class="text-white fw-semibold small">@j.Title</span><br>
+                                <span class="text-muted" style="font-size:0.72rem"><i class="bi bi-geo-alt me-1"></i>@j.Location</span>
                             </td>
-                            <td>@job.Company</td>
-                            <td>@job.Location</td>
-                            <td>@job.PostedAt.ToString("MMM dd, yyyy")</td>
+                            <td><span class="text-muted small">@j.Company</span></td>
+                            <td><span class="tag @(j.Type=="Internship"?"tag-gold":j.Type=="Remote"?"tag-green":"tag-blue")">@j.Type</span></td>
+                            <td><span class="tag tag-purple">@j.Industry</span></td>
+                            <td><span class="text-muted small">@j.SalaryRange</span></td>
+                            <td><span class="text-muted small">@j.Deadline.ToString("MMM dd, yyyy")</span></td>
                             <td>
-                                <div class="d-flex gap-2">
-                                    <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="btn btn-sm btn-outline-info" target="_blank"><i class="bi bi-eye"></i> View</a>
-                                    <form asp-action="DeleteJob" asp-route-id="@job.Id" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this job listing?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                                <span class="tag @(j.IsActive?"tag-green":"tag-red")">@(j.IsActive?"Active":"Inactive")</span>
+                            </td>
+                            <td><span class="tag tag-blue">@j.Applications.Count</span></td>
+                            <td>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <a asp-action="EditJob" asp-route-id="@j.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-action="ToggleJob" asp-route-id="@j.Id" method="post" class="d-inline">
+                                        <button class="btn btn-sm @(j.IsActive?"btn-outline-warning":"btn-outline-success")" title="@(j.IsActive?"Deactivate":"Activate")">
+                                            <i class="bi @(j.IsActive?"bi-pause-circle":"bi-play-circle")"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="DeleteJob" asp-route-id="@j.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Delete this job listing?')">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                                     </form>
                                 </div>
                             </td>

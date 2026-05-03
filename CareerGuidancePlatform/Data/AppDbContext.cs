@@ -28,6 +28,7 @@ namespace CareerGuidancePlatform.Data
         public DbSet<ResumeExperience> ResumeExperiences { get; set; }
         public DbSet<ResumeEducation> ResumeEducations { get; set; }
         public DbSet<ResumeCertification> ResumeCertifications { get; set; }
+        public DbSet<MentorMessage> MentorMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -75,6 +76,18 @@ namespace CareerGuidancePlatform.Data
                 .HasOne(r => r.User)
                 .WithOne(u => u.ResumeData)
                 .HasForeignKey<ResumeData>(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<MentorMessage>()
+                .HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<MentorMessage>()
+                .HasOne(m => m.Mentor)
+                .WithMany()
+                .HasForeignKey(m => m.MentorId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

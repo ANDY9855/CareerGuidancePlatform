@@ -1,0 +1,140 @@
+@model CareerGuidancePlatform.Models.Mentor
+@{ ViewData["Title"] = "Mentor Dashboard"; }
+@await Html.PartialAsync("_MentorNav")
+
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex align-items-center gap-4 flex-wrap">
+            <div class="mentor-avatar" style="width:72px;height:72px;font-size:2rem;background:var(--gradient-mentor)">@Model.Name[0]</div>
+            <div>
+                <h1 class="text-white fw-bold mb-0">@Model.Name</h1>
+                <p class="text-muted mb-1">@Model.Specialization &nbsp;·&nbsp; @Model.Industry</p>
+                <span class="tag @(Model.IsAvailable?"tag-green":"tag-red")">@(Model.IsAvailable?"● Available":"● Unavailable")</span>
+                <span class="tag tag-gold ms-1">★ @Model.Rating</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="container">
+    <!-- STAT CARDS -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card-glass text-center p-3" style="border-color:rgba(6,214,160,0.3)">
+                <i class="bi bi-calendar-check mb-2" style="font-size:1.6rem;color:#06d6a0"></i>
+                <div class="text-white fw-bold" style="font-size:1.8rem">@ViewBag.TotalSessions</div>
+                <div class="text-muted small">Total Sessions</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card-glass text-center p-3" style="border-color:rgba(245,200,66,0.3)">
+                <i class="bi bi-hourglass-split mb-2" style="font-size:1.6rem;color:var(--accent-gold)"></i>
+                <div class="text-white fw-bold" style="font-size:1.8rem">@ViewBag.Pending</div>
+                <div class="text-muted small">Pending</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card-glass text-center p-3" style="border-color:rgba(79,110,247,0.3)">
+                <i class="bi bi-check-circle mb-2" style="font-size:1.6rem;color:var(--accent-blue-light)"></i>
+                <div class="text-white fw-bold" style="font-size:1.8rem">@ViewBag.Confirmed</div>
+                <div class="text-muted small">Confirmed</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card-glass text-center p-3" style="border-color:rgba(255,59,48,0.2)">
+                <i class="bi bi-chat-dots mb-2" style="font-size:1.6rem;color:#ff3b30"></i>
+                <div class="text-white fw-bold" style="font-size:1.8rem">@ViewBag.UnreadMessages</div>
+                <div class="text-muted small">Unread Messages</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- UPCOMING SESSIONS -->
+        <div class="col-lg-7">
+            <div class="card-glass">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="text-white fw-bold mb-0"><i class="bi bi-calendar-check me-2" style="color:#06d6a0"></i>Upcoming Sessions</h5>
+                    <a asp-action="Sessions" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                @{ var upcomingSessions = (List<CareerGuidancePlatform.Models.MentorSession>)ViewBag.UpcomingSessions; }
+                @if (upcomingSessions.Count == 0)
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-calendar-x fs-2 text-muted d-block mb-2"></i>
+                        <p class="text-muted">No upcoming sessions</p>
+                    </div>
+                }
+                @foreach (var s in upcomingSessions)
+                {
+                    <div class="card-glass mb-3" style="padding:1rem">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="d-flex gap-2 mb-1">
+                                    <span class="tag @(s.Status=="Confirmed"?"tag-green":"tag-gold")">@s.Status</span>
+                                    <span class="tag tag-blue">@s.SessionType</span>
+                                </div>
+                                <div class="text-white fw-semibold small">@s.Topic</div>
+                                <div class="text-muted" style="font-size:0.75rem">
+                                    <i class="bi bi-person me-1"></i>@s.User?.FullName &nbsp;·&nbsp;
+                                    <i class="bi bi-clock me-1"></i>@s.ScheduledAt.ToString("MMM dd, yyyy h:mm tt")
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1">
+                                @if (s.Status == "Pending")
+                                {
+                                    <form asp-action="UpdateSession" method="post" class="d-inline">
+                                        <input type="hidden" name="sessionId" value="@s.Id" />
+                                        <input type="hidden" name="status" value="Confirmed" />
+                                        <button class="btn btn-sm btn-outline-success" title="Confirm"><i class="bi bi-check-lg"></i></button>
+                                    </form>
+                                }
+                                <form asp-action="UpdateSession" method="post" class="d-inline">
+                                    <input type="hidden" name="sessionId" value="@s.Id" />
+                                    <input type="hidden" name="status" value="Cancelled" />
+                                    <button class="btn btn-sm btn-outline-danger" title="Cancel" onclick="return confirm('Cancel this session?')"><i class="bi bi-x-lg"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-lg-5">
+            <!-- RECENT MESSAGES -->
+            <div class="card-glass mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-white fw-bold mb-0"><i class="bi bi-chat-dots me-2" style="color:#06d6a0"></i>Recent Messages</h5>
+                    <a asp-action="Messages" class="btn btn-sm btn-outline-primary">All Messages</a>
+                </div>
+                @{ var recentMessages = (List<CareerGuidancePlatform.Models.MentorMessage>)ViewBag.RecentMessages; }
+                @if (recentMessages.Count == 0)
+                {
+                    <p class="text-muted small text-center py-3">No messages yet</p>
+                }
+                @foreach (var msg in recentMessages)
+                {
+                    <div class="d-flex align-items-start gap-2 mb-3">
+                        <div class="mentor-avatar" style="width:34px;height:34px;font-size:0.8rem;flex-shrink:0">@(msg.User?.FullName?.FirstOrDefault() ?? 'U')</div>
+                        <div>
+                            <div class="text-white" style="font-size:0.8rem;font-weight:600">@msg.User?.FullName</div>
+                            <div class="text-muted" style="font-size:0.78rem">@(msg.Content.Length > 60 ? msg.Content[..60]+"..." : msg.Content)</div>
+                            <div class="text-muted" style="font-size:0.68rem">@msg.SentAt.ToString("MMM dd h:mm tt")</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- PROFILE QUICK VIEW -->
+            <div class="card-glass">
+                <h5 class="text-white fw-bold mb-3"><i class="bi bi-person-badge me-2" style="color:#06d6a0"></i>My Profile</h5>
+                <div class="mb-2"><span class="text-muted small d-block">Specialization</span><span class="text-white small">@Model.Specialization</span></div>
+                <div class="mb-2"><span class="text-muted small d-block">Availability</span><span class="text-white small">@(Model.Availability ?? "Not set")</span></div>
+                <div class="mb-3"><span class="text-muted small d-block">Experience</span><span class="text-white small">@Model.YearsOfExperience+ years</span></div>
+                <a asp-action="EditProfile" class="btn btn-outline-primary w-100 btn-sm"><i class="bi bi-pencil me-2"></i>Edit Profile</a>
+            </div>
+        </div>
+    </div>
+</section>

@@ -28,19 +28,33 @@
                     <li class="nav-item"><a class="nav-link" asp-controller="Jobs" asp-action="Index"><i class="bi bi-briefcase me-1"></i>Jobs</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Goals" asp-action="Index"><i class="bi bi-bullseye me-1"></i>Goals</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Networking" asp-action="Events"><i class="bi bi-calendar-event me-1"></i>Network</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Resume" asp-action="Builder"><i class="bi bi-file-person me-1"></i>Resume</a></li>
-                </ul>
                 <div class="d-flex gap-2 align-items-center">
                     @if (User.Identity!.IsAuthenticated)
                     {
                         if (User.IsInRole("Admin"))
                         {
-                            <a asp-controller="Admin" asp-action="Index" class="btn btn-gold btn-sm me-2 text-dark fw-bold"><i class="bi bi-shield-lock-fill me-1"></i>Admin Panel</a>
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-gold btn-sm me-1 text-dark fw-bold"><i class="bi bi-shield-lock-fill me-1"></i>Admin Panel</a>
                         }
-                        <span class="text-light small me-2"><i class="bi bi-person-circle me-1"></i>@User.Identity.Name?.Split('@')[0]</span>
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                        </form>
+                        if (User.IsInRole("Mentor") && !User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="MentorDashboard" asp-action="Index" class="btn btn-sm me-2 fw-bold" style="background:rgba(6,214,160,0.15);border:1px solid rgba(6,214,160,0.4);color:#06d6a0"><i class="bi bi-person-video3 me-1"></i>My Dashboard</a>
+                        }
+                        <div class="dropdown ms-2">
+                            <a class="btn btn-outline-light btn-sm dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i>@User.Identity.Name?.Split('@')[0]
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background:rgba(15,18,25,0.95);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px)">
+                                <li><a class="dropdown-item" asp-controller="Goals" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>My Dashboard</a></li>
+                                <li><a class="dropdown-item" asp-controller="Mentorship" asp-action="MySessions"><i class="bi bi-chat-dots me-2"></i>Messages & Sessions</a></li>
+                                <li><a class="dropdown-item" asp-controller="Resume" asp-action="Builder"><i class="bi bi-file-earmark-person me-2"></i>Resume Builder</a></li>
+                                <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.1)"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
                     }
                     else
                     {

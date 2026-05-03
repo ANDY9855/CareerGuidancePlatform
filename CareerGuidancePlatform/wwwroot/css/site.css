@@ -4,22 +4,28 @@
    ============================================ */
 
 :root {
-    --bg-primary: #050d1a;
-    --bg-card: #0d1b2e;
-    --bg-card-hover: #112240;
-    --accent-blue: #4f6ef7;
-    --accent-blue-light: #6d88ff;
-    --accent-gold: #f5c842;
-    --text-primary: #e8eaf0;
-    --text-muted: #8892a4;
-    --border-color: rgba(79, 110, 247, 0.2);
-    --gradient-hero: linear-gradient(135deg, #050d1a 0%, #0a1628 40%, #0d1f3c 100%);
-    --gradient-btn: linear-gradient(135deg, #4f6ef7, #7c5cf7);
-    --gradient-gold: linear-gradient(135deg, #f5c842, #f59e0b);
-    --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
-    --shadow-glow: 0 0 40px rgba(79,110,247,0.15);
-    --radius: 16px;
-    --radius-sm: 10px;
+    --accent-primary:   #ff2d6b;
+    --accent-secondary: #ff6b35;
+    --accent-gold:      #ffd166;
+    --accent-mentor:    #06d6a0;
+    --bg-primary:       #0a0a0f;
+    --bg-secondary:     #10101a;
+    --bg-card:          rgba(255, 255, 255, 0.03);
+    --bg-card-hover:    rgba(255, 255, 255, 0.05);
+    --border-color:     rgba(255, 255, 255, 0.07);
+    --text-primary:     #f5f0ff;
+    --text-secondary:   #c8c2d8;
+    --text-muted:       #52506a;
+    --gradient-hero:    linear-gradient(135deg, #0a0a0f 0%, #1a1014 40%, #221218 100%);
+    --gradient-btn:     linear-gradient(135deg, #ff2d6b 0%, #ff6b35 100%);
+    --gradient-gold:    linear-gradient(135deg, #ffd166 0%, #d4a843 100%);
+    --gradient-mentor:  linear-gradient(135deg, #06d6a0 0%, #05a37d 100%);
+    --shadow-card:      0 4px 24px rgba(0,0,0,0.5);
+    --shadow-glow:      0 0 40px rgba(255, 45, 107, 0.15);
+    --radius:           16px;
+    --radius-sm:        10px;
+    --accent-blue:      var(--accent-primary); /* Fallbacks for older classes */
+    --accent-blue-light:var(--accent-secondary);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,7 +47,7 @@ body {
 
 /* ---- Navbar ---- */
 #mainNav {
-    background: rgba(5, 13, 26, 0.95);
+    background: rgba(10, 10, 15, 0.95);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-color);
     transition: all 0.3s ease;
@@ -122,6 +128,7 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(10px);
 }
 .card-glass:hover {
     background: var(--bg-card-hover);
@@ -153,7 +160,7 @@ body {
     content: '';
     position: absolute;
     width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(79,110,247,0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 45, 107, 0.08) 0%, transparent 70%);
     top: -100px; right: -100px;
     border-radius: 50%;
 }
@@ -161,7 +168,7 @@ body {
     content: '';
     position: absolute;
     width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(245,200,66,0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 209, 102, 0.06) 0%, transparent 70%);
     bottom: -50px; left: -50px;
     border-radius: 50%;
 }
@@ -275,11 +282,11 @@ body {
 }
 .form-control::placeholder { color: var(--text-muted) !important; }
 .form-label { color: var(--text-muted); font-size: 0.875rem; font-weight: 500; margin-bottom: 0.4rem; }
-.form-select option { background: var(--bg-card); color: var(--text-primary); }
+.form-select option { background: var(--bg-primary) !important; color: var(--text-primary) !important; }
 
 /* ---- Page Header ---- */
 .page-header {
-    background: linear-gradient(135deg, #0a1628 0%, #0d1f3c 100%);
+    background: var(--gradient-hero);
     border-bottom: 1px solid var(--border-color);
     padding: 3.5rem 0 2.5rem;
     position: relative;
@@ -289,7 +296,7 @@ body {
     content: '';
     position: absolute;
     width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(79,110,247,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 45, 107, 0.08) 0%, transparent 70%);
     top: -80px; right: 5%;
     border-radius: 50%;
 }
@@ -319,7 +326,7 @@ body {
 
 /* ---- Footer ---- */
 .footer {
-    background: rgba(5,13,26,0.9);
+    background: rgba(10,10,15,0.9);
     border-top: 1px solid var(--border-color);
 }
 .footer-link { color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 0.5rem; transition: color 0.2s; }

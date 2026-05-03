@@ -1,0 +1,85 @@
+@model CareerGuidancePlatform.Models.JobListing
+@{ ViewData["Title"] = "Edit Job"; }
+@await Html.PartialAsync("_AdminNav")
+
+<div class="page-header">
+    <div class="container">
+        <a asp-action="ManageJobs" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to Jobs</a>
+        <h1 class="text-white fw-bold mt-2">Edit Job: <span class="text-gradient">@Model.Title</span></h1>
+    </div>
+</div>
+
+<section class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-glass">
+                <form asp-action="EditJob" method="post">
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="PostedAt" type="hidden" />
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Job Title *</label>
+                            <input asp-for="Title" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Type *</label>
+                            <select asp-for="Type" class="form-select">
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Remote">Remote</option>
+                                <option value="Contract">Contract</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Company *</label>
+                            <input asp-for="Company" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Location *</label>
+                            <input asp-for="Location" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Industry *</label>
+                            <select asp-for="Industry" class="form-select">
+                                <option value="Technology">Technology</option>
+                                <option value="Design">Design</option>
+                                <option value="Security">Security</option>
+                                <option value="Management">Management</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="General">General</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Salary Range *</label>
+                            <input asp-for="SalaryRange" class="form-control" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Job Description *</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Requirements</label>
+                            <textarea asp-for="Requirements" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Application Deadline *</label>
+                            <input asp-for="Deadline" class="form-control" type="date" required />
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch ms-2 mb-2">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label text-muted" asp-for="IsActive">Active (visible to users)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-save me-2"></i>Save Changes</button>
+                        <a asp-action="ManageJobs" class="btn btn-outline-primary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

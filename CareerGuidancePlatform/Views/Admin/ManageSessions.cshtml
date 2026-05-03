@@ -1,0 +1,55 @@
+@model IEnumerable<CareerGuidancePlatform.Models.MentorSession>
+@{ ViewData["Title"] = "Manage Sessions"; var statuses = new[] { "Pending","Confirmed","Completed","Cancelled" }; }
+@await Html.PartialAsync("_AdminNav")
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold mb-0"><i class="bi bi-camera-video me-2 text-gradient-gold"></i>Manage Sessions</h1>
+        <p class="text-muted mb-0">@Model.Count() mentor sessions</p>
+    </div>
+</div>
+
+<section class="container">
+    <div class="card-glass">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr><th>User</th><th>Mentor</th><th>Topic</th><th>Type</th><th>Scheduled</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td><span class="text-white small">@s.User?.FullName</span></td>
+                            <td><span class="text-muted small">@s.Mentor?.Name</span></td>
+                            <td><span class="text-muted small">@(s.Topic.Length > 40 ? s.Topic[..40]+"..." : s.Topic)</span></td>
+                            <td><span class="tag tag-blue">@s.SessionType</span></td>
+                            <td><span class="text-muted small">@s.ScheduledAt.ToString("MMM dd, yyyy h:mm tt")</span></td>
+                            <td>
+                                <span class="tag @(s.Status=="Confirmed"?"tag-green":s.Status=="Completed"?"tag-blue":s.Status=="Cancelled"?"tag-red":"tag-gold")">
+                                    @s.Status
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <form asp-action="UpdateSessionStatus" method="post" class="d-flex gap-1">
+                                        <input type="hidden" name="sessionId" value="@s.Id" />
+                                        <select name="status" class="form-select form-select-sm" style="max-width:120px">
+                                            @foreach (var st in statuses)
+                                            { <option value="@st" selected="@(s.Status==st)">@st</option> }
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">Set</button>
+                                    </form>
+                                    <form asp-action="DeleteSession" asp-route-id="@s.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Remove this session?')">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

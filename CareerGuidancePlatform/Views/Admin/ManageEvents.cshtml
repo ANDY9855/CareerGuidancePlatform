@@ -1,0 +1,52 @@
+@model IEnumerable<CareerGuidancePlatform.Models.NetworkingEvent>
+@{ ViewData["Title"] = "Manage Events"; }
+@await Html.PartialAsync("_AdminNav")
+
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="text-white fw-bold mb-0"><i class="bi bi-calendar-event me-2 text-gradient-gold"></i>Manage Events</h1>
+            <p class="text-muted mb-0">@Model.Count() networking events</p>
+        </div>
+        <a asp-action="CreateEvent" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Create Event</a>
+    </div>
+</div>
+
+<section class="container">
+    <div class="card-glass">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr><th>Event</th><th>Type</th><th>Date</th><th>Location</th><th>Industry</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="text-white small fw-semibold">@e.Title</span><br>
+                                <span class="text-muted" style="font-size:0.72rem">by @e.Organizer</span>
+                            </td>
+                            <td><span class="tag tag-purple">@e.EventType</span></td>
+                            <td>
+                                <span class="text-muted small">@e.EventDate.ToString("MMM dd, yyyy")</span><br>
+                                <span class="tag @(e.IsOnline?"tag-green":"tag-blue")" style="font-size:0.68rem">@(e.IsOnline?"Online":"In-Person")</span>
+                            </td>
+                            <td><span class="text-muted small">@e.Location</span></td>
+                            <td><span class="tag tag-gold">@e.Industry</span></td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-action="EditEvent" asp-route-id="@e.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <form asp-action="DeleteEvent" asp-route-id="@e.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Delete this event?')">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,86 @@
+@model CareerGuidancePlatform.Models.Resource
+@{ ViewData["Title"] = "Add Resource"; }
+@await Html.PartialAsync("_AdminNav")
+
+<div class="page-header">
+    <div class="container">
+        <a asp-action="ManageResources" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to Resources</a>
+        <h1 class="text-white fw-bold mt-2">Add New Resource</h1>
+    </div>
+</div>
+
+<section class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-glass">
+                <form asp-action="CreateResource" method="post">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Title *</label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. CS50 Introduction to Computer Science" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Description *</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Brief description of this resource..." required></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Type *</label>
+                            <select asp-for="Type" class="form-select">
+                                <option value="Course">Course</option>
+                                <option value="Book">Book</option>
+                                <option value="Article">Article</option>
+                                <option value="Tutorial">Tutorial</option>
+                                <option value="Video">Video</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Industry *</label>
+                            <select asp-for="Industry" class="form-select">
+                                <option value="Technology">Technology</option>
+                                <option value="Design">Design</option>
+                                <option value="Security">Security</option>
+                                <option value="Management">Management</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Healthcare">Healthcare</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Difficulty Level</label>
+                            <select asp-for="DifficultyLevel" class="form-select">
+                                <option value="1">Beginner</option>
+                                <option value="2">Intermediate</option>
+                                <option value="3">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Skill Category</label>
+                            <input asp-for="SkillCategory" class="form-control" placeholder="Web Development, Data Science..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Provider</label>
+                            <input asp-for="Provider" class="form-control" placeholder="Coursera, Udemy, O'Reilly..." />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">URL (optional)</label>
+                            <input asp-for="Url" class="form-control" type="url" placeholder="https://..." />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Duration (optional)</label>
+                            <input asp-for="Duration" class="form-control" placeholder="40 hours / 6 months" />
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsFree" class="form-check-input" type="checkbox" checked />
+                                <label class="form-check-label text-muted" asp-for="IsFree">Free resource</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-bookmark-plus me-2"></i>Add Resource</button>
+                        <a asp-action="ManageResources" class="btn btn-outline-primary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

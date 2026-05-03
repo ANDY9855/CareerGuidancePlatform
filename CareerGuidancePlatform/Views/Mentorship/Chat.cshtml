@@ -1,0 +1,158 @@
+@model List<CareerGuidancePlatform.Models.MentorMessage>
+@{
+    ViewData["Title"] = "Chat";
+    var mentor = (CareerGuidancePlatform.Models.Mentor)ViewBag.Mentor;
+    var mentorId = (int)ViewBag.MentorId;
+}
+
+<div class="page-header">
+    <div class="container">
+        <a asp-action="Profile" asp-route-id="@mentorId" class="text-muted small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i>Back to Profile
+        </a>
+        <div class="d-flex align-items-center gap-3 mt-2">
+            <div class="mentor-avatar" style="width:52px;height:52px;font-size:1.3rem">@mentor.Name[0]</div>
+            <div>
+                <h1 class="text-white fw-bold mb-0" style="font-size:1.5rem">@mentor.Name</h1>
+                <p class="text-muted mb-0 small">@mentor.Specialization</p>
+                <span class="tag @(mentor.IsAvailable?"tag-green":"tag-red")">@(mentor.IsAvailable?"● Online":"● Away")</span>
+            </div>
+            <div class="ms-auto">
+                <a asp-action="Book" asp-route-mentorId="@mentorId" class="btn btn-primary btn-sm">
+                    <i class="bi bi-calendar-plus me-1"></i>Book Session
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-glass" style="min-height:520px;display:flex;flex-direction:column">
+
+                <!-- Quick Info Bar -->
+                <div class="d-flex gap-3 mb-4 p-3 rounded-xl" style="background:rgba(79,110,247,0.06);border:1px solid var(--border-color)">
+                    <div class="text-center flex-grow-1">
+                        <div class="text-white fw-bold">@mentor.YearsOfExperience+</div>
+                        <div class="text-muted" style="font-size:0.72rem">Years Exp.</div>
+                    </div>
+                    <div class="text-center flex-grow-1">
+                        <div class="text-white fw-bold">@mentor.TotalSessions</div>
+                        <div class="text-muted" style="font-size:0.72rem">Sessions</div>
+                    </div>
+                    <div class="text-center flex-grow-1">
+                        <div class="text-gradient-gold fw-bold">★ @mentor.Rating</div>
+                        <div class="text-muted" style="font-size:0.72rem">Rating</div>
+                    </div>
+                    <div class="text-center flex-grow-1">
+                        <div class="text-white fw-bold small">@(mentor.Availability ?? "Flexible")</div>
+                        <div class="text-muted" style="font-size:0.72rem">Availability</div>
+                    </div>
+                </div>
+
+                <!-- Chat Thread -->
+                <div class="flex-grow-1 mb-4 overflow-auto" style="max-height:380px" id="chatBox">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-chat-heart fs-2 text-muted d-block mb-2"></i>
+                            <p class="text-muted small">Say hello to @mentor.Name! Send your first message below.</p>
+                        </div>
+                    }
+                    @foreach (var msg in Model)
+                    {
+                        <div class="d-flex @(msg.IsFromMentor?"justify-content-start":"justify-content-end") mb-3">
+                            @if (msg.IsFromMentor)
+                            {
+                                <div class="mentor-avatar me-2" style="width:32px;height:32px;font-size:0.75rem;flex-shrink:0;align-self:flex-end">@mentor.Name[0]</div>
+                            }
+                            <div style="max-width:70%">
+                                <div class="@(msg.IsFromMentor?"msg-bubble-mentor-u":"msg-bubble-user-u")">
+                                    @msg.Content
+                                </div>
+                                <div class="text-muted mt-1" style="font-size:0.68rem;text-align:@(msg.IsFromMentor?"left":"right")">
+                                    @msg.SentAt.ToString("MMM dd h:mm tt")
+                                    @if (!msg.IsFromMentor) { <span>@(msg.IsRead?"✓✓":"✓")</span> }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Send Message Form -->
+                <form id="chatForm" class="d-flex gap-2 mt-auto" onsubmit="sendChat(event)">
+                    <input type="hidden" id="mentorId" value="@mentorId" />
+                    <input id="chatContent" class="form-control" placeholder="Type a message to @mentor.Name..." autocomplete="off" required />
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.msg-bubble-user-u   { background:var(--gradient-btn); color:white; padding:0.6rem 1rem; border-radius:18px 18px 4px 18px; font-size:0.88rem; word-wrap:break-word; }
+.msg-bubble-mentor-u { background:rgba(255,255,255,0.06); border:1px solid var(--border-color); color:var(--text-primary); padding:0.6rem 1rem; border-radius:18px 18px 18px 4px; font-size:0.88rem; word-wrap:break-word; }
+</style>
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+const box = document.getElementById('chatBox');
+if (box) box.scrollTop = box.scrollHeight;
+
+const mentorId = document.getElementById('mentorId').value;
+const userId = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+const mentorAvatar = '@mentor.Name[0]';
+
+// Initialize SignalR
+const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+connection.start().then(() => {
+    connection.invoke("JoinChat", `Chat_${mentorId}_${userId}`);
+}).catch(err => console.error(err.toString()));
+
+// Listen for incoming real-time messages
+connection.on("ReceiveMessage", function (msg) {
+    let html = '';
+    if (msg.isFromMentor) {
+        html = `
+        <div class="d-flex justify-content-start mb-3">
+            <div class="mentor-avatar me-2" style="width:32px;height:32px;font-size:0.75rem;flex-shrink:0;align-self:flex-end">${mentorAvatar}</div>
+            <div style="max-width:70%">
+                <div class="msg-bubble-mentor-u">${msg.content}</div>
+                <div class="text-muted mt-1" style="font-size:0.68rem;text-align:left">${msg.sentAt}</div>
+            </div>
+        </div>`;
+    } else {
+        html = `
+        <div class="d-flex justify-content-end mb-3">
+            <div style="max-width:70%">
+                <div class="msg-bubble-user-u">${msg.content}</div>
+                <div class="text-muted mt-1" style="font-size:0.68rem;text-align:right">${msg.sentAt} <span>✓</span></div>
+            </div>
+        </div>`;
+    }
+    box.insertAdjacentHTML('beforeend', html);
+    box.scrollTop = box.scrollHeight;
+});
+
+// Send message via AJAX
+function sendChat(e) {
+    e.preventDefault();
+    const contentInput = document.getElementById('chatContent');
+    const content = contentInput.value;
+    if (!content.trim()) return;
+
+    fetch('@Url.Action("SendMessage", "Mentorship")', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ mentorId: mentorId, content: content })
+    }).then(res => {
+        if(res.ok) contentInput.value = '';
+    });
+}
+</script>
+}

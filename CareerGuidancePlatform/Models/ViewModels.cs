@@ -43,4 +43,21 @@ namespace CareerGuidancePlatform.Models
         public string SessionType { get; set; } = "Video";
         public string Topic { get; set; } = string.Empty;
     }
+
+    // Mentor messaging ViewModels
+    public class MentorConversationItem
+    {
+        public ApplicationUser User { get; set; } = new();
+        public MentorMessage LastMessage { get; set; } = new();
+        public int UnreadCount { get; set; }
+    }
+
+    public class MentorMessagesViewModel
+    {
+        public Mentor Mentor { get; set; } = new();
+        public List<MentorConversationItem> Conversations { get; set; } = new();
+        public List<MentorMessage>? Thread { get; set; }
+        public ApplicationUser? SelectedUser { get; set; }
+        public string? SelectedUserId { get; set; }
+    }
 }

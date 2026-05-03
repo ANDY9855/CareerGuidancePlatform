@@ -1,73 +1,113 @@
-@model IEnumerable<CareerGuidancePlatform.Models.PeerPost>
+@using CareerGuidancePlatform.Models
 @{ ViewData["Title"] = "Admin Dashboard"; }
+@await Html.PartialAsync("_AdminNav")
 
 <div class="page-header">
     <div class="container">
-        <h1 class="text-white fw-bold">👑 Admin Control Panel</h1>
-        <p class="text-muted">Manage the platform data and monitor activities.</p>
+        <div class="d-flex align-items-center gap-3">
+            <div class="feature-icon" style="background:rgba(245,200,66,0.15);border-color:rgba(245,200,66,0.3)">
+                <i class="bi bi-shield-lock-fill" style="color:var(--accent-gold)"></i>
+            </div>
+            <div>
+                <h1 class="text-white fw-bold mb-0">Admin Control Panel</h1>
+                <p class="text-muted mb-0">Full platform management &amp; oversight</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<section class="container mb-5">
-    <!-- Stat Cards -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card-glass text-center p-4">
-                <i class="bi bi-people-fill text-gold fs-1 mb-2"></i>
-                <h2 class="text-white fw-bold">@ViewBag.TotalUsers</h2>
-                <p class="text-muted mb-0">Total Users</p>
+<section class="container">
+    <!-- STAT CARDS -->
+    <div class="row g-3 mb-4">
+        @{
+            var stats = new (string Icon, string Label, object? Count, string Action, string Tag)[] {
+                ("bi-people-fill",         "Total Users",    ViewBag.TotalUsers,        "ManageUsers",        "tag-blue"),
+                ("bi-briefcase-fill",      "Total Jobs",     ViewBag.TotalJobs,         "ManageJobs",         "tag-green"),
+                ("bi-person-video3",       "Mentors",        ViewBag.TotalMentors,      "ManageMentors",      "tag-purple"),
+                ("bi-camera-video",        "Sessions",       ViewBag.TotalSessions,     "ManageSessions",     "tag-gold"),
+                ("bi-book-fill",           "Resources",      ViewBag.TotalResources,    "ManageResources",    "tag-blue"),
+                ("bi-calendar-event-fill", "Events",         ViewBag.TotalEvents,       "ManageEvents",       "tag-green"),
+                ("bi-send-fill",           "Applications",   ViewBag.TotalApplications, "ManageApplications", "tag-purple"),
+                ("bi-chat-dots-fill",      "Posts",          ViewBag.TotalPosts,        "ManagePosts",        "tag-gold"),
+            };
+        }
+        @foreach (var s in stats)
+        {
+            <div class="col-6 col-md-3">
+                <a asp-action="@s.Action" style="text-decoration:none">
+                    <div class="card-glass text-center p-3">
+                        <i class="bi @s.Icon mb-2" style="font-size:1.75rem;color:var(--accent-gold)"></i>
+                        <div class="text-white fw-bold" style="font-size:1.6rem">@s.Count</div>
+                        <div class="text-muted small">@s.Label</div>
+                        <span class="tag @s.Tag mt-2" style="font-size:0.7rem">Manage →</span>
+                    </div>
+                </a>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-glass text-center p-4">
-                <i class="bi bi-briefcase-fill text-gold fs-1 mb-2"></i>
-                <h2 class="text-white fw-bold">@ViewBag.TotalJobs</h2>
-                <p class="text-muted mb-0">Active Jobs</p>
-                <a asp-action="ManageJobs" class="btn btn-sm btn-outline-primary mt-3">Manage Jobs</a>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-glass text-center p-4">
-                <i class="bi bi-person-video3 text-gold fs-1 mb-2"></i>
-                <h2 class="text-white fw-bold">@ViewBag.TotalMentors</h2>
-                <p class="text-muted mb-0">Active Mentors</p>
-                <a asp-action="ManageMentors" class="btn btn-sm btn-outline-primary mt-3">Manage Mentors</a>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-glass text-center p-4">
-                <i class="bi bi-calendar-check-fill text-gold fs-1 mb-2"></i>
-                <h2 class="text-white fw-bold">@ViewBag.TotalSessions</h2>
-                <p class="text-muted mb-0">Booked Sessions</p>
-            </div>
-        </div>
+        }
     </div>
 
-    <!-- Recent Activity -->
-    <h3 class="text-white mb-4"><i class="bi bi-activity text-gold me-2"></i>Recent Community Activity</h3>
-    <div class="card-glass">
-        <div class="table-responsive">
-            <table class="table table-dark table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Post Content</th>
-                        <th>Likes</th>
-                        <th>Posted At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var post in Model)
-                    {
-                        <tr>
-                            <td>@(post.User?.FullName ?? "Unknown")</td>
-                            <td>@(post.Content.Length > 50 ? post.Content.Substring(0, 50) + "..." : post.Content)</td>
-                            <td><span class="badge bg-gold text-dark">@post.Likes <i class="bi bi-heart-fill"></i></span></td>
-                            <td>@post.PostedAt.ToString("MMM dd, yyyy")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <div class="row g-4">
+        <!-- RECENT APPLICATIONS -->
+        <div class="col-lg-7">
+            <div class="card-glass">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="text-white fw-bold mb-0"><i class="bi bi-send me-2 text-gradient"></i>Recent Applications</h5>
+                    <a asp-action="ManageApplications" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 align-middle">
+                        <thead><tr><th>Applicant</th><th>Job</th><th>Status</th><th>Date</th></tr></thead>
+                        <tbody>
+                            @foreach (var app in (List<JobApplication>)ViewBag.RecentApplications)
+                            {
+                                <tr>
+                                    <td><span class="text-white small">@app.User?.FullName</span></td>
+                                    <td><span class="text-muted small">@app.JobListing?.Title</span></td>
+                                    <td>
+                                        <span class="tag @(app.Status=="Applied"?"tag-blue":app.Status=="Interview"?"tag-purple":app.Status=="Offer"?"tag-green":"tag-red")">
+                                            @app.Status
+                                        </span>
+                                    </td>
+                                    <td><span class="text-muted small">@app.AppliedAt.ToString("MMM dd")</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECENT USERS + QUICK ACTIONS -->
+        <div class="col-lg-5">
+            <div class="card-glass mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-white fw-bold mb-0"><i class="bi bi-people me-2 text-gradient-gold"></i>New Users</h5>
+                    <a asp-action="ManageUsers" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                @foreach (var user in (List<ApplicationUser>)ViewBag.RecentUsers)
+                {
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="mentor-avatar" style="width:36px;height:36px;font-size:0.85rem">
+                            @(user.FullName.Length > 0 ? user.FullName[0] : 'U')
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="text-white small fw-semibold">@user.FullName</div>
+                            <div class="text-muted" style="font-size:0.72rem">@user.Email</div>
+                        </div>
+                        <span class="text-muted" style="font-size:0.72rem">@user.CreatedAt.ToString("MMM dd")</span>
+                    </div>
+                }
+            </div>
+
+            <div class="card-glass">
+                <h5 class="text-white fw-bold mb-3"><i class="bi bi-lightning-charge me-2 text-gradient-gold"></i>Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <a asp-action="CreateJob"      class="btn btn-outline-primary text-start"><i class="bi bi-plus-circle me-2"></i>Post New Job</a>
+                    <a asp-action="CreateMentor"   class="btn btn-outline-primary text-start"><i class="bi bi-person-plus me-2"></i>Add Mentor</a>
+                    <a asp-action="CreateResource" class="btn btn-outline-primary text-start"><i class="bi bi-bookmark-plus me-2"></i>Add Resource</a>
+                    <a asp-action="CreateEvent"    class="btn btn-outline-primary text-start"><i class="bi bi-calendar-plus me-2"></i>Create Event</a>
+                </div>
+            </div>
         </div>
     </div>
 </section>

@@ -1,0 +1,72 @@
+@model IEnumerable<CareerGuidancePlatform.Models.JobApplication>
+@{ ViewData["Title"] = "Manage Applications"; }
+@await Html.PartialAsync("_AdminNav")
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold mb-0"><i class="bi bi-send me-2 text-gradient-gold"></i>All Job Applications</h1>
+        <p class="text-muted mb-0">@Model.Count() total applications across all jobs</p>
+    </div>
+</div>
+
+<section class="container">
+    <!-- Summary stats -->
+    <div class="row g-3 mb-4">
+        @{ var appStatuses = new[] { ("Applied","tag-blue"), ("Interview","tag-purple"), ("Offer","tag-green"), ("Rejected","tag-red") }; }
+        @foreach (var (st, tag) in appStatuses)
+        {
+            <div class="col-6 col-md-3">
+                <div class="card-glass text-center p-3">
+                    <div class="text-white fw-bold" style="font-size:1.8rem">@Model.Count(a => a.Status == st)</div>
+                    <span class="tag @tag mt-1">@st</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card-glass">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr><th>Applicant</th><th>Job</th><th>Company</th><th>Applied</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="text-white small fw-semibold">@a.User?.FullName</span><br>
+                                <span class="text-muted" style="font-size:0.72rem">@a.User?.Email</span>
+                            </td>
+                            <td><span class="text-white small">@a.JobListing?.Title</span></td>
+                            <td><span class="text-muted small">@a.JobListing?.Company</span></td>
+                            <td><span class="text-muted small">@a.AppliedAt.ToString("MMM dd, yyyy")</span></td>
+                            <td>
+                                <span class="tag @(a.Status=="Applied"?"tag-blue":a.Status=="Interview"?"tag-purple":a.Status=="Offer"?"tag-green":"tag-red")">
+                                    @a.Status
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 align-items-center">
+                                    <form asp-action="UpdateApplicationStatus" method="post" class="d-inline mb-0">
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border-color);color:var(--text-primary);padding-right:2rem">
+                                            @if(a.Status == "Applied") { <option value="Applied" selected>Applied</option> } else { <option value="Applied">Applied</option> }
+                                            @if(a.Status == "Interview") { <option value="Interview" selected>Interview</option> } else { <option value="Interview">Interview</option> }
+                                            @if(a.Status == "Offer") { <option value="Offer" selected>Offer</option> } else { <option value="Offer">Offer</option> }
+                                            @if(a.Status == "Rejected") { <option value="Rejected" selected>Rejected</option> } else { <option value="Rejected">Rejected</option> }
+                                        </select>
+                                    </form>
+                                    <form asp-action="DeleteApplication" asp-route-id="@a.Id" method="post" class="d-inline mb-0"
+                                          onsubmit="return confirm('Remove this application?')">
+                                        <button class="btn btn-sm btn-outline-danger" style="padding:0.25rem 0.5rem"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

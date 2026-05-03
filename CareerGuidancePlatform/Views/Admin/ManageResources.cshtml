@@ -1,0 +1,56 @@
+@model IEnumerable<CareerGuidancePlatform.Models.Resource>
+@{ ViewData["Title"] = "Manage Resources"; }
+@await Html.PartialAsync("_AdminNav")
+
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="text-white fw-bold mb-0"><i class="bi bi-book me-2 text-gradient-gold"></i>Manage Resources</h1>
+            <p class="text-muted mb-0">@Model.Count() resources in library</p>
+        </div>
+        <a asp-action="CreateResource" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Resource</a>
+    </div>
+</div>
+
+<section class="container">
+    <div class="card-glass">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr><th>Title</th><th>Type</th><th>Industry</th><th>Provider</th><th>Level</th><th>Free?</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="text-white small fw-semibold">@r.Title</span><br>
+                                <span class="text-muted" style="font-size:0.7rem">@r.SkillCategory</span>
+                            </td>
+                            <td><span class="tag @(r.Type=="Course"?"tag-blue":r.Type=="Book"?"tag-gold":r.Type=="Article"?"tag-green":"tag-purple")">@r.Type</span></td>
+                            <td><span class="text-muted small">@r.Industry</span></td>
+                            <td><span class="text-muted small">@r.Provider</span></td>
+                            <td>
+                                <span class="tag tag-blue">
+                                    @(r.DifficultyLevel == 1 ? "Beginner" : r.DifficultyLevel == 2 ? "Intermediate" : "Advanced")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="tag @(r.IsFree?"tag-green":"tag-red")">@(r.IsFree?"Free":"Paid")</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-action="EditResource" asp-route-id="@r.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <form asp-action="DeleteResource" asp-route-id="@r.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Delete this resource?')">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

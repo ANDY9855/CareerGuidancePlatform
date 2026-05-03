@@ -1,0 +1,77 @@
+@model CareerGuidancePlatform.Models.NetworkingEvent
+@{ ViewData["Title"] = "Edit Event"; }
+@await Html.PartialAsync("_AdminNav")
+
+<div class="page-header">
+    <div class="container">
+        <a asp-action="ManageEvents" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to Events</a>
+        <h1 class="text-white fw-bold mt-2">Edit: <span class="text-gradient">@Model.Title</span></h1>
+    </div>
+</div>
+
+<section class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-glass">
+                <form asp-action="EditEvent" method="post">
+                    <input asp-for="Id" type="hidden" />
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Event Title *</label>
+                            <input asp-for="Title" class="form-control" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Description *</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Event Type *</label>
+                            <select asp-for="EventType" class="form-select">
+                                <option value="Conference">Conference</option><option value="Webinar">Webinar</option>
+                                <option value="Meetup">Meetup</option><option value="Workshop">Workshop</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Industry *</label>
+                            <select asp-for="Industry" class="form-select">
+                                <option value="Technology">Technology</option><option value="Design">Design</option>
+                                <option value="Security">Security</option><option value="Management">Management</option>
+                                <option value="Finance">Finance</option><option value="General">General</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Icon Class</label>
+                            <input asp-for="IconClass" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Organizer *</label>
+                            <input asp-for="Organizer" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Event Date & Time *</label>
+                            <input asp-for="EventDate" class="form-control" type="datetime-local" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Location *</label>
+                            <input asp-for="Location" class="form-control" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Registration URL</label>
+                            <input asp-for="RegistrationUrl" class="form-control" type="url" />
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsOnline" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label text-muted" asp-for="IsOnline">Online event</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-save me-2"></i>Save Changes</button>
+                        <a asp-action="ManageEvents" class="btn btn-outline-primary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

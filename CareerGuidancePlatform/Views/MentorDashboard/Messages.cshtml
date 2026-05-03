@@ -1,0 +1,193 @@
+@model CareerGuidancePlatform.Models.MentorMessagesViewModel
+@{ ViewData["Title"] = "Messages"; }
+@await Html.PartialAsync("_MentorNav")
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white fw-bold mb-0"><i class="bi bi-chat-dots me-2" style="color:#06d6a0"></i>Messages</h1>
+        <p class="text-muted mb-0">Your conversations with mentees</p>
+    </div>
+</div>
+
+<section class="container">
+    <div class="row g-4" style="min-height:600px">
+
+        <!-- CONVERSATION LIST -->
+        <div class="col-lg-4">
+            <div class="card-glass h-100">
+                <h6 class="text-white fw-semibold mb-3"><i class="bi bi-people me-2"></i>Conversations
+                    <span class="tag tag-blue ms-2">@Model.Conversations.Count</span>
+                </h6>
+                @if (!Model.Conversations.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-chat-square fs-2 text-muted d-block mb-2"></i>
+                        <p class="text-muted small">No messages yet.<br/>Users can message you from your profile.</p>
+                    </div>
+                }
+                @foreach (var conv in Model.Conversations)
+                {
+                    <a asp-action="Messages" asp-route-userId="@conv.User.Id"
+                       class="d-flex align-items-center gap-3 mb-3 p-2 rounded text-decoration-none @(Model.SelectedUserId == conv.User.Id ? "msg-active" : "msg-item")">
+                        <div class="mentor-avatar" style="width:40px;height:40px;font-size:0.95rem;flex-shrink:0">
+                            @(conv.User.FullName?.FirstOrDefault() ?? 'U')
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-white small fw-semibold">@conv.User.FullName</span>
+                                @if (conv.UnreadCount > 0)
+                                {
+                                    <span class="badge rounded-pill" style="background:#06d6a0;font-size:0.65rem">@conv.UnreadCount</span>
+                                }
+                            </div>
+                            <div class="text-muted" style="font-size:0.72rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                                @(conv.LastMessage.IsFromMentor ? "You: " : "")@(conv.LastMessage.Content.Length > 38 ? conv.LastMessage.Content[..38] + "..." : conv.LastMessage.Content)
+                            </div>
+                            <div class="text-muted" style="font-size:0.65rem">@conv.LastMessage.SentAt.ToString("MMM dd, h:mm tt")</div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- CHAT THREAD -->
+        <div class="col-lg-8">
+            <div class="card-glass d-flex flex-column" style="min-height:560px">
+                @if (Model.SelectedUser == null || Model.Thread == null)
+                {
+                    <div class="d-flex align-items-center justify-content-center flex-column py-5 flex-grow-1">
+                        <i class="bi bi-chat-left-dots fs-1 text-muted mb-3"></i>
+                        <p class="text-muted">Select a conversation on the left</p>
+                    </div>
+                }
+                else
+                {
+                    <!-- Thread Header -->
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:1px solid var(--border-color)">
+                        <div class="mentor-avatar" style="width:44px;height:44px;font-size:1rem">
+                            @(Model.SelectedUser.FullName?.FirstOrDefault() ?? 'U')
+                        </div>
+                        <div>
+                            <div class="text-white fw-semibold">@Model.SelectedUser.FullName</div>
+                            <div class="text-muted" style="font-size:0.75rem">@Model.SelectedUser.Email</div>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="tag tag-green" style="font-size:0.7rem">@Model.Thread.Count messages</span>
+                        </div>
+                    </div>
+
+                    <!-- Messages Thread -->
+                    <div class="flex-grow-1 overflow-auto mb-4 pe-1" style="max-height:380px" id="msgThread">
+                        @if (!Model.Thread.Any())
+                        {
+                            <div class="text-center text-muted small py-3">No messages yet in this conversation</div>
+                        }
+                        @foreach (var msg in Model.Thread)
+                        {
+                            <div class="d-flex @(msg.IsFromMentor ? "justify-content-end" : "justify-content-start") mb-3">
+                                @if (!msg.IsFromMentor)
+                                {
+                                    <div class="mentor-avatar me-2" style="width:30px;height:30px;font-size:0.72rem;flex-shrink:0;align-self:flex-end">
+                                        @(Model.SelectedUser.FullName?.FirstOrDefault() ?? 'U')
+                                    </div>
+                                }
+                                <div style="max-width:72%">
+                                    <div style="@(msg.IsFromMentor ? "background:linear-gradient(135deg,rgba(6,214,160,0.2),rgba(6,214,160,0.1));border:1px solid rgba(6,214,160,0.4);border-radius:18px 18px 4px 18px" : "background:rgba(255,255,255,0.06);border:1px solid var(--border-color);border-radius:18px 18px 18px 4px") ;color:var(--text-primary);padding:0.65rem 1rem;font-size:0.88rem;word-wrap:break-word">
+                                        @msg.Content
+                                    </div>
+                                    <div class="text-muted mt-1" style="font-size:0.68rem;text-align:@(msg.IsFromMentor?"right":"left")">
+                                        @msg.SentAt.ToString("MMM dd, h:mm tt")
+                                        @if (msg.IsFromMentor) { <span class="ms-1 text-success">@(msg.IsRead ? "✓✓" : "✓")</span> }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Reply Form -->
+                    <form id="replyForm" class="d-flex gap-2 mt-auto" onsubmit="sendReply(event)">
+                        <input type="hidden" id="mentorId" value="@Model.Mentor.Id" />
+                        <input type="hidden" id="userId" value="@Model.SelectedUser.Id" />
+                        <input id="chatContent" class="form-control" placeholder="Type your reply to @Model.SelectedUser.FullName..." autocomplete="off" required />
+                        <button type="submit" class="btn btn-primary px-3">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.msg-item  { border:1px solid transparent; transition:all 0.2s; }
+.msg-item:hover  { background:rgba(79,110,247,0.07); border-color:var(--border-color); border-radius:10px; }
+.msg-active { background:rgba(6,214,160,0.1); border:1px solid rgba(6,214,160,0.3); border-radius:10px; }
+</style>
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+const box = document.getElementById('msgThread');
+if (box) box.scrollTop = box.scrollHeight;
+
+@if (Model.SelectedUser != null)
+{
+<text>
+const mentorId = '@Model.Mentor.Id';
+const userId = '@Model.SelectedUser.Id';
+const userAvatar = '@(Model.SelectedUser.FullName?.FirstOrDefault() ?? 'U')';
+
+// Initialize SignalR
+const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+connection.start().then(() => {
+    connection.invoke("JoinChat", `Chat_${mentorId}_${userId}`);
+}).catch(err => console.error(err.toString()));
+
+// Listen for incoming real-time messages
+connection.on("ReceiveMessage", function (msg) {
+    let html = '';
+    if (msg.isFromMentor) {
+        html = `
+        <div class="d-flex justify-content-end mb-3">
+            <div style="max-width:72%">
+                <div style="background:linear-gradient(135deg,rgba(6,214,160,0.2),rgba(6,214,160,0.1));border:1px solid rgba(6,214,160,0.4);border-radius:18px 18px 4px 18px;color:var(--text-primary);padding:0.65rem 1rem;font-size:0.88rem;word-wrap:break-word">
+                    ${msg.content}
+                </div>
+                <div class="text-muted mt-1" style="font-size:0.68rem;text-align:right">${msg.sentAt} <span class="ms-1 text-success">✓</span></div>
+            </div>
+        </div>`;
+    } else {
+        html = `
+        <div class="d-flex justify-content-start mb-3">
+            <div class="mentor-avatar me-2" style="width:30px;height:30px;font-size:0.72rem;flex-shrink:0;align-self:flex-end">${userAvatar}</div>
+            <div style="max-width:72%">
+                <div style="background:rgba(255,255,255,0.06);border:1px solid var(--border-color);border-radius:18px 18px 18px 4px;color:var(--text-primary);padding:0.65rem 1rem;font-size:0.88rem;word-wrap:break-word">
+                    ${msg.content}
+                </div>
+                <div class="text-muted mt-1" style="font-size:0.68rem;text-align:left">${msg.sentAt}</div>
+            </div>
+        </div>`;
+    }
+    box.insertAdjacentHTML('beforeend', html);
+    box.scrollTop = box.scrollHeight;
+});
+
+// Send message via AJAX
+function sendReply(e) {
+    e.preventDefault();
+    const contentInput = document.getElementById('chatContent');
+    const content = contentInput.value;
+    if (!content.trim()) return;
+
+    fetch('@Url.Action("ReplyMessage", "MentorDashboard")', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ mentorId: mentorId, userId: userId, content: content })
+    }).then(res => {
+        if(res.ok) contentInput.value = '';
+    });
+}
+</text>
+}
+</script>
+}

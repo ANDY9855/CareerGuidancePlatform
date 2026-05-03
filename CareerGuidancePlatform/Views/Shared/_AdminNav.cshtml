@@ -1,0 +1,44 @@
+@{
+    var cur = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    bool isJob      = cur.Contains("Job");
+    bool isMentor   = cur.Contains("Mentor");
+    bool isUser     = cur == "ManageUsers";
+    bool isResource = cur.Contains("Resource");
+    bool isEvent    = cur.Contains("Event");
+    bool isSession  = cur == "ManageSessions";
+    bool isApp      = cur == "ManageApplications";
+    bool isPost     = cur == "ManagePosts";
+    bool isIndex    = cur == "Index";
+}
+<nav class="admin-subnav">
+    <div class="container">
+        <div class="admin-nav-inner">
+            <span class="admin-nav-label"><i class="bi bi-shield-lock-fill me-1"></i>Admin</span>
+            <div class="admin-nav-links">
+                <a asp-controller="Admin" asp-action="Index"              class="admin-nav-link @(isIndex    ? "active" : "")"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
+                <a asp-controller="Admin" asp-action="ManageJobs"         class="admin-nav-link @(isJob      ? "active" : "")"><i class="bi bi-briefcase me-1"></i>Jobs</a>
+                <a asp-controller="Admin" asp-action="ManageMentors"      class="admin-nav-link @(isMentor   ? "active" : "")"><i class="bi bi-person-video3 me-1"></i>Mentors</a>
+                <a asp-controller="Admin" asp-action="ManageUsers"        class="admin-nav-link @(isUser     ? "active" : "")"><i class="bi bi-people me-1"></i>Users</a>
+                <a asp-controller="Admin" asp-action="ManageResources"    class="admin-nav-link @(isResource ? "active" : "")"><i class="bi bi-book me-1"></i>Resources</a>
+                <a asp-controller="Admin" asp-action="ManageEvents"       class="admin-nav-link @(isEvent    ? "active" : "")"><i class="bi bi-calendar-event me-1"></i>Events</a>
+                <a asp-controller="Admin" asp-action="ManageSessions"     class="admin-nav-link @(isSession  ? "active" : "")"><i class="bi bi-camera-video me-1"></i>Sessions</a>
+                <a asp-controller="Admin" asp-action="ManageApplications" class="admin-nav-link @(isApp      ? "active" : "")"><i class="bi bi-send me-1"></i>Applications</a>
+                <a asp-controller="Admin" asp-action="ManagePosts"        class="admin-nav-link @(isPost     ? "active" : "")"><i class="bi bi-chat-dots me-1"></i>Posts</a>
+            </div>
+        </div>
+    </div>
+</nav>
+<style>
+.admin-subnav {
+    background: rgba(245,200,66,0.06);
+    border-bottom: 1px solid rgba(245,200,66,0.25);
+    position: sticky; top: 72px; z-index: 999;
+    backdrop-filter: blur(12px);
+}
+.admin-nav-inner { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 0; overflow-x: auto; }
+.admin-nav-label { color: var(--accent-gold); font-weight: 700; font-size: 0.8rem; white-space: nowrap; letter-spacing: 0.05em; text-transform: uppercase; }
+.admin-nav-links { display: flex; gap: 0.25rem; flex-wrap: nowrap; }
+.admin-nav-link { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.8rem; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: all 0.2s; border: 1px solid transparent; }
+.admin-nav-link:hover { color: var(--accent-gold); background: rgba(245,200,66,0.08); }
+.admin-nav-link.active { color: var(--accent-gold); background: rgba(245,200,66,0.12); border-color: rgba(245,200,66,0.3); }
+</style>
