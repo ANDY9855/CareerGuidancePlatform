@@ -1,5 +1,6 @@
 using CareerGuidancePlatform.Data;
 using CareerGuidancePlatform.Models;
+using CareerGuidancePlatform.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +14,10 @@ namespace CareerGuidancePlatform.Controllers
     {
         private readonly AppDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public MentorDashboardController(AppDbContext db, UserManager<ApplicationUser> userManager)
-        { _db = db; _userManager = userManager; }
+        public MentorDashboardController(AppDbContext db, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        { _db = db; _userManager = userManager; _emailSender = emailSender; }
 
         // Find the Mentor record linked to the logged-in user's email
         private async Task<Mentor?> GetMyMentor()
@@ -76,16 +78,58 @@ namespace CareerGuidancePlatform.Controllers
             var mentor = await GetMyMentor();
             if (mentor == null) return Unauthorized();
 
-            var session = await _db.MentorSessions.FindAsync(sessionId);
+            var session = await _db.MentorSessions
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.Id == sessionId);
             if (session != null && session.MentorId == mentor.Id)
             {
                 session.Status = status;
                 if (status == "Completed")
-                {
                     mentor.TotalSessions++;
-                }
+
                 await _db.SaveChangesAsync();
                 TempData["Success"] = $"Session marked as {status}.";
+
+                // Create in-app notification for the user
+                var (icon, iconColor) = status switch
+                {
+                    "Confirmed" => ("bi-calendar-check", "text-gradient"),
+                    "Cancelled" => ("bi-x-circle", "tag-red"),
+                    "Completed" => ("bi-trophy", "text-gradient-gold"),
+                    _           => ("bi-bell", "text-gradient")
+                };
+                var chatUrl = $"/Mentorship/Chat?mentorId={mentor.Id}";
+                var notification = new Notification
+                {
+                    UserId    = session.UserId,
+                    Title     = $"Session {status}",
+                    Message   = $"Your session with {mentor.Name} has been {status.ToLower()}.",
+                    Url       = chatUrl,
+                    Icon      = icon,
+                    IconColor = iconColor
+                };
+                _db.Notifications.Add(notification);
+                await _db.SaveChangesAsync();
+
+                // Send email to the user
+                try
+                {
+                    var user = session.User;
+                    if (user != null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        await _emailSender.SendEmailAsync(
+                            user.Email, user.UserName ?? "User",
+                            "Session " + status + " - Career Guidance Platform",
+                            EmailTemplates.SessionStatusChanged(
+                                user.UserName ?? "User",
+                                mentor.Name,
+                                status,
+                                chatUrl
+                            )
+                        );
+                    }
+                }
+                catch { /* Email is non-critical */ }
             }
             return RedirectToAction(nameof(Sessions));
         }
@@ -181,6 +225,20 @@ namespace CareerGuidancePlatform.Controllers
                 return Json(new { success = true });
             }
             return BadRequest();
+        }
+
+        // ─────── VIDEO CALL ───────
+        [HttpGet]
+        public async Task<IActionResult> VideoCall(string roomId, string? callerConnId = null, bool isCaller = false, string? userId = null)
+        {
+            var mentor = await GetMyMentor();
+            if (mentor == null) return Unauthorized();
+
+            ViewBag.RoomId = roomId;
+            ViewBag.CallerConnId = callerConnId;
+            ViewBag.IsCaller = isCaller;
+            ViewBag.UserId = userId;
+            return View(mentor);
         }
 
         // ─────── PROFILE ───────

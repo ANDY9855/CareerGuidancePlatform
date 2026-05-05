@@ -1,5 +1,6 @@
 using CareerGuidancePlatform.Data;
 using CareerGuidancePlatform.Models;
+using CareerGuidancePlatform.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,8 +13,9 @@ namespace CareerGuidancePlatform.Controllers
     {
         private readonly AppDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
-        public MentorshipController(AppDbContext db, UserManager<ApplicationUser> userManager)
-        { _db = db; _userManager = userManager; }
+        private readonly IEmailSender _emailSender;
+        public MentorshipController(AppDbContext db, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        { _db = db; _userManager = userManager; _emailSender = emailSender; }
 
         public async Task<IActionResult> Index(string? industry, string? specialization)
         {
@@ -57,6 +59,28 @@ namespace CareerGuidancePlatform.Controllers
             };
             _db.MentorSessions.Add(session);
             await _db.SaveChangesAsync();
+
+            // Send email notification to mentor
+            try
+            {
+                var mentor = await _db.Mentors.FindAsync(model.MentorId);
+                if (mentor != null && !string.IsNullOrEmpty(mentor.Email))
+                {
+                    await _emailSender.SendEmailAsync(
+                        mentor.Email, mentor.Name,
+                        "New Session Booking - Career Guidance Platform",
+                        EmailTemplates.SessionBooked(
+                            mentor.Name,
+                            user!.UserName ?? "A user",
+                            model.Topic,
+                            model.SessionType,
+                            model.ScheduledAt.ToString("MMMM dd, yyyy h:mm tt")
+                        )
+                    );
+                }
+            }
+            catch { /* Email is non-critical */ }
+
             TempData["Success"] = "Session booked! Your mentor will confirm shortly.";
             return RedirectToAction("MySessions");
         }
@@ -90,8 +114,11 @@ namespace CareerGuidancePlatform.Controllers
             unread.ForEach(m => m.IsRead = true);
             if (unread.Any()) await _db.SaveChangesAsync();
 
+            var hasActiveSession = await _db.MentorSessions.AnyAsync(s => s.UserId == user!.Id && s.MentorId == mentorId && s.Status != "Cancelled");
+
             ViewBag.Mentor = mentor;
             ViewBag.MentorId = mentorId;
+            ViewBag.HasActiveSession = hasActiveSession;
             return View(messages);
         }
 
@@ -100,6 +127,13 @@ namespace CareerGuidancePlatform.Controllers
         public async Task<IActionResult> SendMessage(int mentorId, string content, [FromServices] Microsoft.AspNetCore.SignalR.IHubContext<CareerGuidancePlatform.Hubs.ChatHub> hubContext)
         {
             var user = await _userManager.GetUserAsync(User);
+            
+            var hasActiveSession = await _db.MentorSessions.AnyAsync(s => s.UserId == user!.Id && s.MentorId == mentorId && s.Status != "Cancelled");
+            if (!hasActiveSession)
+            {
+                return BadRequest("Cannot send messages. Your session with this mentor has been cancelled.");
+            }
+
             if (!string.IsNullOrWhiteSpace(content))
             {
                 var msg = new MentorMessage
@@ -124,6 +158,30 @@ namespace CareerGuidancePlatform.Controllers
                 return Json(new { success = true });
             }
             return BadRequest();
+        }
+
+        [Authorize]
+        public async Task<IActionResult> VideoCall(int mentorId, bool isCaller = true, string? callerConnId = null)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var mentor = await _db.Mentors.FindAsync(mentorId);
+            if (mentor == null) return NotFound();
+
+            var hasActiveSession = await _db.MentorSessions.AnyAsync(
+                s => s.UserId == user!.Id && s.MentorId == mentorId && s.Status != "Cancelled");
+            if (!hasActiveSession)
+            {
+                TempData["Error"] = "You need an active session to start a video call.";
+                return RedirectToAction("Chat", new { mentorId });
+            }
+
+            ViewBag.Mentor = mentor;
+            ViewBag.MentorId = mentorId;
+            ViewBag.UserName = user!.UserName ?? user.Email;
+            ViewBag.UserId = user.Id;
+            ViewBag.IsCaller = isCaller;
+            ViewBag.CallerConnId = callerConnId;
+            return View();
         }
     }
 }

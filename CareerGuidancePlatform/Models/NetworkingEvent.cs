@@ -24,5 +24,15 @@ namespace CareerGuidancePlatform.Models
         public string Category { get; set; } = string.Empty; // Advice, Question, Experience, Opportunity
         public int Likes { get; set; } = 0;
         public DateTime PostedAt { get; set; } = DateTime.UtcNow;
+        public ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
+    }
+
+    public class PostLike
+    {
+        public int Id { get; set; }
+        public int PostId { get; set; }
+        public PeerPost? Post { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public ApplicationUser? User { get; set; }
     }
 }

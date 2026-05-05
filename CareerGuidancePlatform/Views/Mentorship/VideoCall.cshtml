@@ -1,0 +1,262 @@
+@{
+    ViewData["Title"] = "Video Call";
+    var mentor = (CareerGuidancePlatform.Models.Mentor)ViewBag.Mentor;
+    var mentorId = (int)ViewBag.MentorId;
+    var userName = (string)ViewBag.UserName;
+    var callRoomId = $"VideoRoom_{mentorId}_{ViewBag.UserId}";
+}
+
+<style>
+body { background:#000 !important; padding:0 !important; }
+#vcPage { position:fixed; inset:0; background:#050510; display:flex; flex-direction:column; z-index:9999; }
+
+/* Videos */
+#remoteVideo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#0a0a1a; }
+#localVideo  { position:absolute; bottom:110px; right:20px; width:190px; height:140px; object-fit:cover;
+               border-radius:14px; border:2px solid rgba(255,45,107,0.7); box-shadow:0 8px 32px rgba(0,0,0,0.7);
+               z-index:10; cursor:grab; transition:box-shadow 0.2s; }
+#localVideo:active { cursor:grabbing; }
+
+/* Top Bar */
+#topBar { position:absolute; top:0; left:0; right:0; height:64px; padding:0 1.5rem;
+          display:flex; align-items:center; justify-content:space-between;
+          background:linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); z-index:20; }
+#callerCard { display:flex; align-items:center; gap:12px; }
+.vc-avatar { width:42px; height:42px; border-radius:50%; background:var(--gradient-btn); display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:700; color:#fff; }
+#callTimer { font-size:0.85rem; color:rgba(255,255,255,0.8); background:rgba(0,0,0,0.4); padding:0.25rem 0.8rem; border-radius:50px; }
+
+/* Status Overlay */
+#statusOverlay { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:#fff; z-index:5; transition:opacity 0.4s; }
+#statusOverlay .pulse-ring { width:100px; height:100px; border-radius:50%; background:rgba(255,45,107,0.15); border:2px solid rgba(255,45,107,0.5); margin:0 auto 1.2rem; display:flex; align-items:center; justify-content:center; animation:pulseRing 1.5s infinite; }
+@@keyframes pulseRing { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.12);opacity:0.8} }
+
+/* Controls */
+#controls { position:absolute; bottom:28px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:14px; z-index:20; }
+.vc-btn { width:58px; height:58px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; font-size:1.3rem; cursor:pointer; transition:all 0.2s; backdrop-filter:blur(8px); }
+.vc-btn:hover { transform:scale(1.12); }
+.btn-mic   { background:rgba(255,255,255,0.18); color:#fff; }
+.btn-cam   { background:rgba(255,255,255,0.18); color:#fff; }
+.btn-share { background:rgba(79,110,247,0.7); color:#fff; }
+.btn-end   { background:#ff3b30; color:#fff; width:68px; height:68px; font-size:1.5rem; box-shadow:0 6px 24px rgba(255,59,48,0.5); }
+.btn-off   { background:rgba(255,59,48,0.35) !important; }
+</style>
+
+<div id="vcPage">
+    <!-- Top Bar -->
+    <div id="topBar">
+        <div id="callerCard">
+            <div class="vc-avatar">@mentor.Name[0]</div>
+            <div>
+                <div style="color:#fff;font-weight:600;font-size:0.95rem">@mentor.Name</div>
+                <div style="color:rgba(255,255,255,0.55);font-size:0.75rem">@mentor.Specialization</div>
+            </div>
+        </div>
+        <div id="callTimer" style="display:none">00:00</div>
+        <a href="/Mentorship/Chat?mentorId=@mentorId" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.8rem">
+            <i class="bi bi-arrow-left me-1"></i>Back to Chat
+        </a>
+    </div>
+
+    <!-- Remote Video -->
+    <video id="remoteVideo" autoplay playsinline></video>
+
+    <!-- Status Overlay (shown while ringing) -->
+    <div id="statusOverlay">
+        <div class="pulse-ring"><div class="vc-avatar" style="width:60px;height:60px;font-size:1.5rem">@mentor.Name[0]</div></div>
+        <h4 style="font-weight:700;margin-bottom:0.5rem">@mentor.Name</h4>
+        <p id="statusText" style="color:rgba(255,255,255,0.6);font-size:0.9rem">Calling...</p>
+    </div>
+
+    <!-- Local Video (draggable PiP) -->
+    <video id="localVideo" autoplay playsinline muted></video>
+
+    <!-- Controls -->
+    <div id="controls">
+        <button class="vc-btn btn-mic"   id="micBtn"   onclick="toggleMic()"    title="Mute/Unmute"><i class="bi bi-mic-fill"          id="micIcon"></i></button>
+        <button class="vc-btn btn-cam"   id="camBtn"   onclick="toggleCam()"    title="Camera"><i    class="bi bi-camera-video-fill"    id="camIcon"></i></button>
+        <button class="vc-btn btn-end"               onclick="endCall()"       title="End Call"><i   class="bi bi-telephone-x-fill"></i></button>
+        <button class="vc-btn btn-share" id="shareBtn" onclick="toggleScreen()" title="Share Screen"><i class="bi bi-display"           id="shareIcon"></i></button>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+const mentorId  = '@mentorId';
+const callRoomId = '@callRoomId';
+const userName   = '@userName';
+const iceConfig  = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+const isCaller   = @(ViewBag.IsCaller?.ToString().ToLower() ?? "true");
+const callerConnId = '@(ViewBag.CallerConnId ?? "")';
+
+let pc = null, localStream = null, screenStream = null;
+let myConnId = '', mentorConnId = '';
+let micOn = true, camOn = true, sharing = false;
+let timerInterval = null, timerSec = 0;
+
+const remoteVideo = document.getElementById('remoteVideo');
+const localVideo  = document.getElementById('localVideo');
+const statusOverlay = document.getElementById('statusOverlay');
+const statusText  = document.getElementById('statusText');
+
+// ── SignalR ────────────────────────────────────────────────────────────────
+const conn = new signalR.HubConnectionBuilder().withUrl('/chatHub')
+    .withAutomaticReconnect().build();
+
+conn.start().then(async () => {
+    myConnId = await conn.invoke('GetConnectionId');
+    await conn.invoke('JoinVideoRoom', callRoomId);
+    await startLocalStream();
+    
+    if (isCaller) {
+        // We are calling the mentor
+        await conn.invoke('CallMentor', mentorId, userName, callRoomId);
+        statusText.textContent = 'Ringing @mentor.Name...';
+    } else {
+        // Mentor called us, we are answering
+        await conn.invoke('AcceptCall', callerConnId, callRoomId);
+        statusText.textContent = 'Connecting...';
+    }
+});
+
+conn.on('CallAccepted', async (mentorConnIdIn) => {
+    mentorConnId = mentorConnIdIn;
+    statusText.textContent = 'Connecting...';
+    await createPeerConnection();
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await conn.invoke('SendOffer', callRoomId, JSON.stringify(offer));
+});
+
+conn.on('CallDeclined', () => {
+    statusText.textContent = '❌ Call was declined.';
+    document.querySelector('.pulse-ring').style.animation = 'none';
+    setTimeout(() => { window.location.href = '/Mentorship/Chat?mentorId=@mentorId'; }, 2500);
+});
+
+conn.on('ReceiveOffer', async (from, sdpOffer) => {
+    mentorConnId = from;
+    await createPeerConnection();
+    await pc.setRemoteDescription(JSON.parse(sdpOffer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    await conn.invoke('SendAnswer', mentorConnId, JSON.stringify(answer));
+});
+
+conn.on('ReceiveAnswer', async (from, sdpAnswer) => {
+    mentorConnId = from;
+    if (pc) await pc.setRemoteDescription(JSON.parse(sdpAnswer));
+});
+
+conn.on('ReceiveIceCandidate', async (candidate) => {
+    if (pc) try { await pc.addIceCandidate(JSON.parse(candidate)); } catch(e) {}
+});
+
+conn.on('CallEnded', () => {
+    statusText.textContent = 'Call ended.';
+    statusOverlay.style.opacity = '1';
+    stopTimer();
+    setTimeout(() => { window.location.href = '/Mentorship/Chat?mentorId=@mentorId'; }, 2000);
+});
+
+// ── WebRTC ─────────────────────────────────────────────────────────────────
+async function startLocalStream() {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localVideo.srcObject = localStream;
+}
+
+async function createPeerConnection() {
+    pc = new RTCPeerConnection(iceConfig);
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+    pc.ontrack = e => {
+        remoteVideo.srcObject = e.streams[0];
+        statusOverlay.style.display = 'none';
+        startTimer();
+    };
+    pc.onicecandidate = e => {
+        if (e.candidate) conn.invoke('SendIceCandidate', callRoomId, JSON.stringify(e.candidate));
+    };
+    pc.onconnectionstatechange = () => {
+        if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+            statusText.textContent = 'Connection lost.';
+            statusOverlay.style.display = 'block';
+            stopTimer();
+        }
+    };
+}
+
+function endCall() {
+    conn.invoke('EndCallInRoom', callRoomId).catch(() => {});
+    cleanup();
+    window.location.href = '/Mentorship/Chat?mentorId=@mentorId';
+}
+
+function cleanup() {
+    if (pc) { pc.close(); pc = null; }
+    if (localStream) localStream.getTracks().forEach(t => t.stop());
+    if (screenStream) screenStream.getTracks().forEach(t => t.stop());
+    stopTimer();
+}
+
+function toggleMic() {
+    micOn = !micOn;
+    localStream?.getAudioTracks().forEach(t => t.enabled = micOn);
+    document.getElementById('micIcon').className = micOn ? 'bi bi-mic-fill' : 'bi bi-mic-mute-fill';
+    document.getElementById('micBtn').classList.toggle('btn-off', !micOn);
+}
+
+function toggleCam() {
+    camOn = !camOn;
+    localStream?.getVideoTracks().forEach(t => t.enabled = camOn);
+    document.getElementById('camIcon').className = camOn ? 'bi bi-camera-video-fill' : 'bi bi-camera-video-off-fill';
+    document.getElementById('camBtn').classList.toggle('btn-off', !camOn);
+}
+
+async function toggleScreen() {
+    if (!sharing) {
+        try {
+            screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const track = screenStream.getVideoTracks()[0];
+            pc?.getSenders().find(s => s.track?.kind === 'video')?.replaceTrack(track);
+            localVideo.srcObject = screenStream;
+            document.getElementById('shareIcon').className = 'bi bi-display-fill';
+            document.getElementById('shareBtn').style.background = 'rgba(6,214,160,0.7)';
+            sharing = true;
+            track.onended = toggleScreen;
+        } catch(e) {}
+    } else {
+        const track = localStream?.getVideoTracks()[0];
+        pc?.getSenders().find(s => s.track?.kind === 'video')?.replaceTrack(track);
+        localVideo.srcObject = localStream;
+        document.getElementById('shareIcon').className = 'bi bi-display';
+        document.getElementById('shareBtn').style.background = 'rgba(79,110,247,0.7)';
+        screenStream?.getTracks().forEach(t => t.stop());
+        sharing = false;
+    }
+}
+
+// ── Timer ──────────────────────────────────────────────────────────────────
+function startTimer() {
+    const el = document.getElementById('callTimer');
+    el.style.display = 'block';
+    timerInterval = setInterval(() => {
+        timerSec++;
+        const m = String(Math.floor(timerSec/60)).padStart(2,'0');
+        const s = String(timerSec%60).padStart(2,'0');
+        el.textContent = `${m}:${s}`;
+    }, 1000);
+}
+function stopTimer() { clearInterval(timerInterval); }
+
+// ── Draggable PiP ──────────────────────────────────────────────────────────
+localVideo.addEventListener('mousedown', e => {
+    const ox = e.clientX - localVideo.offsetLeft, oy = e.clientY - localVideo.offsetTop;
+    const mm = e2 => { localVideo.style.left=(e2.clientX-ox)+'px'; localVideo.style.right='auto'; localVideo.style.bottom='auto'; localVideo.style.top=(e2.clientY-oy)+'px'; };
+    const mu = () => { document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
+    document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
+});
+
+window.addEventListener('beforeunload', cleanup);
+</script>
+}

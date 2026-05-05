@@ -71,8 +71,11 @@
                             <div class="text-white fw-semibold">@Model.SelectedUser.FullName</div>
                             <div class="text-muted" style="font-size:0.75rem">@Model.SelectedUser.Email</div>
                         </div>
-                        <div class="ms-auto">
-                            <span class="tag tag-green" style="font-size:0.7rem">@Model.Thread.Count messages</span>
+                        <div class="ms-auto d-flex align-items-center gap-2">
+                            <span class="tag tag-green d-none d-md-inline" style="font-size:0.7rem">@Model.Thread.Count msgs</span>
+                            <a href="/MentorDashboard/VideoCall?roomId=VideoRoom_@(Model.Mentor.Id)_@(Model.SelectedUser.Id)&isCaller=true&userId=@(Model.SelectedUser.Id)" class="btn btn-outline-primary btn-sm px-3" title="Video Call">
+                                <i class="bi bi-camera-video-fill"></i>
+                            </a>
                         </div>
                     </div>
 
@@ -189,5 +192,65 @@ function sendReply(e) {
 }
 </text>
 }
+
+// ── Mentor Incoming Call Overlay ──────────────────────────────────────────
+@if (Model.Mentor != null)
+{
+<text>
+const myMentorId = '@Model.Mentor.Id';
+const mentorConn = new signalR.HubConnectionBuilder().withUrl("/chatHub").withAutomaticReconnect().build();
+let currentCallRoom = '', currentCallerConn = '';
+
+mentorConn.start().then(() => {
+    mentorConn.invoke("RegisterMentor", myMentorId);
+}).catch(console.error);
+
+mentorConn.on("IncomingCall", (callerName, callRoomId, callerConnId) => {
+    currentCallRoom = callRoomId;
+    currentCallerConn = callerConnId;
+    document.getElementById('incomingCallerName').textContent = callerName;
+    document.getElementById('incomingCallOverlay').style.display = 'flex';
+    // Auto-hide after 30s
+    setTimeout(declineCall, 30000);
+});
+
+function acceptCall() {
+    window.location.href = `/MentorDashboard/VideoCall?roomId=${currentCallRoom}&callerConnId=${currentCallerConn}`;
+}
+
+function declineCall() {
+    if (currentCallerConn) {
+        mentorConn.invoke("DeclineCall", currentCallerConn).catch(()=>{});
+    }
+    document.getElementById('incomingCallOverlay').style.display = 'none';
+    currentCallRoom = '';
+    currentCallerConn = '';
+}
+</text>
+}
 </script>
 }
+
+<!-- Incoming Call UI -->
+<div id="incomingCallOverlay" style="display:none;position:fixed;top:20px;right:20px;background:rgba(15,18,25,0.95);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px);padding:1.5rem;border-radius:12px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.5);align-items:center;gap:1.5rem;animation:slideInRight 0.4s ease">
+    <div style="display:flex;align-items:center;gap:1rem">
+        <div class="pulse-ring-small">
+            <div style="width:40px;height:40px;background:linear-gradient(135deg,#06d6a0,#04b486);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem"><i class="bi bi-camera-video-fill"></i></div>
+        </div>
+        <div>
+            <div class="text-white fw-bold mb-1">Incoming Video Call</div>
+            <div class="text-muted small">from <span id="incomingCallerName" class="text-white"></span></div>
+        </div>
+    </div>
+    <div style="display:flex;gap:0.5rem">
+        <button onclick="acceptCall()" class="btn btn-sm" style="background:#06d6a0;color:#000;border:none;font-weight:600;padding:0.4rem 1rem"><i class="bi bi-telephone-fill me-1"></i>Accept</button>
+        <button onclick="declineCall()" class="btn btn-sm" style="background:#ff3b30;color:#fff;border:none;font-weight:600;padding:0.4rem 1rem"><i class="bi bi-telephone-x-fill me-1"></i>Decline</button>
+    </div>
+</div>
+
+<style>
+@@keyframes slideInRight { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+.pulse-ring-small { position:relative; }
+.pulse-ring-small::before { content:''; position:absolute; inset:-8px; border-radius:50%; background:rgba(6,214,160,0.2); border:1px solid rgba(6,214,160,0.5); animation:pulseRingSmall 1.5s infinite; }
+@@keyframes pulseRingSmall { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.2);opacity:0.5} }
+</style>

@@ -39,11 +39,29 @@ namespace CareerGuidancePlatform.Controllers
             return RedirectToAction("Community");
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Like(int postId)
         {
-            var post = await _db.PeerPosts.FindAsync(postId);
-            if (post != null) { post.Likes++; await _db.SaveChangesAsync(); }
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Community");
+
+            var post = await _db.PeerPosts.Include(p => p.PostLikes).FirstOrDefaultAsync(p => p.Id == postId);
+            if (post != null) 
+            { 
+                var existingLike = post.PostLikes.FirstOrDefault(l => l.UserId == user.Id);
+                if (existingLike == null)
+                {
+                    post.PostLikes.Add(new PostLike { UserId = user.Id, PostId = post.Id });
+                    post.Likes++;
+                }
+                else
+                {
+                    post.PostLikes.Remove(existingLike);
+                    post.Likes--;
+                }
+                await _db.SaveChangesAsync(); 
+            }
             return RedirectToAction("Community");
         }
     }

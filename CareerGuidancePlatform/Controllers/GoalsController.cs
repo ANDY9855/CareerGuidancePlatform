@@ -50,16 +50,22 @@ namespace CareerGuidancePlatform.Controllers
         [HttpPost]
         public async Task<IActionResult> ToggleMilestone(int milestoneId)
         {
-            var milestone = await _db.GoalMilestones.Include(m => m.Goal).FirstOrDefaultAsync(m => m.Id == milestoneId);
-            if (milestone != null)
+            var goal = await _db.Goals.Include(g => g.Milestones)
+                                      .FirstOrDefaultAsync(g => g.Milestones.Any(m => m.Id == milestoneId));
+            if (goal != null)
             {
-                milestone.IsCompleted = !milestone.IsCompleted;
-                var goal = milestone.Goal!;
-                var total = await _db.GoalMilestones.CountAsync(m => m.GoalId == goal.Id);
-                var done = await _db.GoalMilestones.CountAsync(m => m.GoalId == goal.Id && m.IsCompleted);
-                goal.ProgressPercent = total > 0 ? (done * 100 / total) : 0;
-                goal.IsCompleted = goal.ProgressPercent == 100;
-                await _db.SaveChangesAsync();
+                var milestone = goal.Milestones.FirstOrDefault(m => m.Id == milestoneId);
+                if (milestone != null)
+                {
+                    milestone.IsCompleted = !milestone.IsCompleted;
+                    
+                    var total = goal.Milestones.Count;
+                    var done = goal.Milestones.Count(m => m.IsCompleted);
+                    goal.ProgressPercent = total > 0 ? (int)Math.Round((double)done * 100 / total) : 0;
+                    goal.IsCompleted = goal.ProgressPercent == 100;
+                    
+                    await _db.SaveChangesAsync();
+                }
             }
             return RedirectToAction("Index");
         }

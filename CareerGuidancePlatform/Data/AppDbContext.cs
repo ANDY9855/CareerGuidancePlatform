@@ -29,6 +29,8 @@ namespace CareerGuidancePlatform.Data
         public DbSet<ResumeEducation> ResumeEducations { get; set; }
         public DbSet<ResumeCertification> ResumeCertifications { get; set; }
         public DbSet<MentorMessage> MentorMessages { get; set; }
+        public DbSet<PostLike> PostLikes { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -88,6 +90,18 @@ namespace CareerGuidancePlatform.Data
                 .HasOne(m => m.Mentor)
                 .WithMany()
                 .HasForeignKey(m => m.MentorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PostLike>()
+                .HasOne(pl => pl.User)
+                .WithMany()
+                .HasForeignKey(pl => pl.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

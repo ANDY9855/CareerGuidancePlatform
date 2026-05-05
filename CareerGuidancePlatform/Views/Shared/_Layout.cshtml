@@ -40,6 +40,22 @@
                         {
                             <a asp-controller="MentorDashboard" asp-action="Index" class="btn btn-sm me-2 fw-bold" style="background:rgba(6,214,160,0.15);border:1px solid rgba(6,214,160,0.4);color:#06d6a0"><i class="bi bi-person-video3 me-1"></i>My Dashboard</a>
                         }
+                        <!-- Notification Bell -->
+                        <div class="dropdown ms-2" id="notifDropdown">
+                            <a class="btn btn-outline-light btn-sm position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="notifBell">
+                                <i class="bi bi-bell-fill"></i>
+                                <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem;display:none">0</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" id="notifList" style="width:320px;background:rgba(15,18,25,0.97);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(12px)">
+                                <li class="px-3 py-2 d-flex justify-content-between align-items-center" style="border-bottom:1px solid rgba(255,255,255,0.08)">
+                                    <span class="text-white fw-semibold small">Notifications</span>
+                                    <a asp-controller="Notifications" asp-action="Index" class="text-gradient small" style="text-decoration:none">View all</a>
+                                </li>
+                                <li id="notifItems"><div class="px-3 py-4 text-center text-muted small">No new notifications</div></li>
+                            </ul>
+                        </div>
+
+                        <!-- User Dropdown -->
                         <div class="dropdown ms-2">
                             <a class="btn btn-outline-light btn-sm dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle me-1"></i>@User.Identity.Name?.Split('@')[0]
@@ -47,6 +63,7 @@
                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background:rgba(15,18,25,0.95);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px)">
                                 <li><a class="dropdown-item" asp-controller="Goals" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>My Dashboard</a></li>
                                 <li><a class="dropdown-item" asp-controller="Mentorship" asp-action="MySessions"><i class="bi bi-chat-dots me-2"></i>Messages & Sessions</a></li>
+                                <li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell me-2"></i>Notifications</a></li>
                                 <li><a class="dropdown-item" asp-controller="Resume" asp-action="Builder"><i class="bi bi-file-earmark-person me-2"></i>Resume Builder</a></li>
                                 <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.1)"></li>
                                 <li>
@@ -171,5 +188,56 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (User.Identity!.IsAuthenticated)
+    {
+        <script>
+        // ── Notification Bell ──────────────────────────────────────────────────
+        async function loadNotifications() {
+            try {
+                const [countRes, previewRes] = await Promise.all([
+                    fetch('/Notifications/UnreadCount'),
+                    fetch('/Notifications/Preview')
+                ]);
+                const { count } = await countRes.json();
+                const items    = await previewRes.json();
+
+                const badge = document.getElementById('notifBadge');
+                if (badge) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.style.display = count > 0 ? 'inline-block' : 'none';
+                }
+
+                const list = document.getElementById('notifItems');
+                if (!list) return;
+                if (!items.length) {
+                    list.innerHTML = '<div class="px-3 py-4 text-center text-muted small">No notifications yet</div>';
+                    return;
+                }
+                list.innerHTML = items.map(n => `
+                    <li>
+                        <form action="/Notifications/MarkRead/${n.id}" method="post" style="margin:0">
+                            <button type="submit" class="dropdown-item py-2 px-3 d-flex gap-2 align-items-start" style="white-space:normal;${n.isRead ? 'opacity:0.6' : ''}">
+                                <i class="bi ${n.icon} ${n.iconColor} flex-shrink-0 mt-1"></i>
+                                <div>
+                                    <div class="text-white small fw-semibold">${n.title} ${!n.isRead ? '<span style="width:7px;height:7px;background:#ff2d6b;border-radius:50%;display:inline-block;margin-left:4px;vertical-align:middle"></span>' : ''}</div>
+                                    <div class="text-muted" style="font-size:0.72rem">${n.message}</div>
+                                    <div class="text-muted" style="font-size:0.68rem;margin-top:2px">${n.time}</div>
+                                </div>
+                            </button>
+                        </form>
+                    </li>
+                    <li><hr class="dropdown-divider m-0" style="border-color:rgba(255,255,255,0.05)"></li>
+                `).join('');
+            } catch(e) { /* fail silently */ }
+        }
+
+        loadNotifications();
+        setInterval(loadNotifications, 30000); // poll every 30s
+
+        // Refresh when bell dropdown opens
+        document.getElementById('notifBell')?.addEventListener('show.bs.dropdown', loadNotifications);
+        </script>
+    }
 </body>
 </html>
